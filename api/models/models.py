@@ -1,17 +1,20 @@
-from main import db, session, Base
+
+from app import db, session, Base
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
-from passlib.hash import  bcrypt
+from passlib.hash import bcrypt
 
-class Costs(Base):
-    __tablename__ = 'costs'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(250), nullable=False)
-    amount = db.Column(db.Text(50), nullable=False)
-    description = db.Column(db.String(250), nullable=False)
-    type = db.Column(db.String(250), nullable=False)
-    date = db.Column(db.TEXT(250), nullable=False)
+
+# class Costs(Base):
+#     __tablename__ = 'costs'
+#     __table_args__ = {'extend_existing': True}
+#     id = db.Column(db.Integer, primary_key=True)
+#     category = db.Column(db.String(250), nullable=False)
+#     amount = db.Column(db.Text(50), nullable=False)
+#     description = db.Column(db.String(250), nullable=False)
+#     type = db.Column(db.String(250), nullable=False)
+#     date = db.Column(db.TEXT(250), nullable=False)
+
 
 class User(Base):
     __tablename__ = 'users'

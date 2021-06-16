@@ -1,31 +1,75 @@
+
+
 from flask import Flask, jsonify, request
 import sqlalchemy as db
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager
+
 from Config1 import Config
 
 
-app = Flask(__name__)
-app.config.from_object(Config)
-
-
 engine = create_engine('sqlite:///db.sqlite')
-
-session = scoped_session(sessionmaker(
-    autocommit=False, autoflush=False, bind=engine))
-
+session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
 Base.query = session.query_property()
-
-jwt = JWTManager(app)
-
-from mdels import *
-
 Base.metadata.create_all(bind=engine)
 
 
+def make_error(status_code, message):
+    response = jsonify({
+        'status': status_code,
+        'message': message
+    })
+    response.status_code = status_code
+    return response
+
+
+def json_body_validator(**kwargs):
+
+    def decorator(func):
+        def wrapper():
+            if not request.is_json:
+                return make_error(400, 'Bad request')
+            for k, v in kwargs.items():
+                parameter = request.json.get(k)
+                if parameter is None and v[1] == "required":
+                    return make_error(400, "'{}' is required".format(k))
+                if type(parameter) is not v[0]:
+                    return make_error(400, "Invalid type for '{}'".format(k))
+            return func()
+        return wrapper
+
+    return decorator
+
+
+def create_app():
+
+    from api.routes.auth import auth_api
+
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    jwt = JWTManager(app)
+
+    @app.teardown_appcontext
+    def shutdown_session(exseption=None):
+        session.remove()
+
+    app.register_blueprint(auth_api)
+
+    return app
+
+
+
+
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run()
+
+
+"""
 # Просмотр всех операций
 @app.route('/costs', methods=['GET'])
 @jwt_required()
@@ -43,6 +87,7 @@ def get_costs():
         })
     return jsonify(serialized)
 
+
 # Добавление новой операции
 @app.route('/costs', methods=['POST'])
 @jwt_required()
@@ -59,6 +104,7 @@ def update_costs():
         'type': new_one.type
     }
     return jsonify(serialized)
+
 
 # Изменение операции
 @app.route('/costs/<int:cost_id>', methods=['PUT'])
@@ -81,6 +127,7 @@ def change_cost(cost_id):
     }
     return jsonify(serialized)
 
+
 # Удаление операции
 @app.route('/costs/<int:cost_id>', methods=['DELETE'])
 @jwt_required()
@@ -93,6 +140,7 @@ def delete_cost(cost_id):
     session.commit()
     return '', 204
 
+
 @app.route('/register', methods=['POST'])
 def register():
     params = request.json
@@ -101,27 +149,7 @@ def register():
     session.commit()
     token = user.get_token()
     return {'access_token': token}
-
-
-@app.route('/login', methods=['POST'])
-def login():
-    params = request.json
-    user = User.authenticate(**params)
-    token = user.get_token()
-    return {'access_token': token}
-
-
-
-
-
-@app.teardown_appcontext
-def shutdown_session(exseption=None):
-    session.remove()
-
-
-if __name__ == '__main__':
-    app.run()
-
+"""
 
 
 
