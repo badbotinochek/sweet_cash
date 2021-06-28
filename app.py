@@ -1,13 +1,12 @@
 
-
-from flask import Flask, jsonify, request
+from flask import Flask
 import sqlalchemy as db
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from flask_jwt_extended import JWTManager
 
-from Config1 import Config
+import config
 
 
 engine = create_engine('sqlite:///db.sqlite')
@@ -17,39 +16,12 @@ Base.query = session.query_property()
 Base.metadata.create_all(bind=engine)
 
 
-def make_error(status_code, message):
-    response = jsonify({
-        'status': status_code,
-        'message': message
-    })
-    response.status_code = status_code
-    return response
-
-
-def json_body_validator(**kwargs):
-
-    def decorator(func):
-        def wrapper():
-            if not request.is_json:
-                return make_error(400, 'Bad request')
-            for k, v in kwargs.items():
-                parameter = request.json.get(k)
-                if parameter is None and v[1] == "required":
-                    return make_error(400, "'{}' is required".format(k))
-                if type(parameter) is not v[0]:
-                    return make_error(400, "Invalid type for '{}'".format(k))
-            return func()
-        return wrapper
-
-    return decorator
-
-
 def create_app():
 
     from api.routes.auth import auth_api
 
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config)
     jwt = JWTManager(app)
 
     @app.teardown_appcontext
@@ -61,13 +33,12 @@ def create_app():
     return app
 
 
-
-
-
 if __name__ == '__main__':
-    app = create_app()
-    app.run()
-
+    try:
+        app = create_app()
+        app.run()
+    except Exception as e:
+        print(e)
 
 """
 # Просмотр всех операций
