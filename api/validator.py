@@ -9,13 +9,13 @@ def jsonbody(**kwargs):
     def decorator(func):
         def wrapper():
             if not request.is_json:
-                return error.BadParams.make()
+                return error.BadParams("Json required")
             for k, v in kwargs.items():
                 parameter = request.json.get(k)
                 if parameter is None and v[1] == "required":
-                    return error.NotRequiredParam(f'{k} is required').make()
+                    return error.BadParams(f'{k} is required')
                 if type(parameter) is not v[0]:
-                    return error.InvalidParamType(f'Invalid type for {k}').make()
+                    return error.BadParams(f'Invalid type for {k}')
             return func()
         return wrapper
 
