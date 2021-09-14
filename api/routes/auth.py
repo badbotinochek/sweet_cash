@@ -1,7 +1,7 @@
 
 from flask import request, jsonify, Blueprint
 from api.validator import jsonbody
-from api.models.models import User
+from api.models.users import User
 
 auth_api = Blueprint('login', __name__)
 
