@@ -1,7 +1,10 @@
 
 from flask import request, jsonify, Blueprint
+
+from db import db
 from api.validator import jsonbody
-from api.models.users import db, User
+from api.models.users import User
+
 
 auth_api = Blueprint('login', __name__)
 
@@ -21,17 +24,25 @@ def login():
 
 
 def _login(name: str, email: str, password: str):
+
+    def create_new_user(name: str, email: str, password: str):
+        u = User(name=name, email=email, password=password)
+        db.session.add(u)
+        db.session.commit()
+        return u.get_id(), u.get_token()
+
     try:
         user = User.authenticate(email=email, password=password)
-        token = user.get_token()
+        if user is not None:
+            user_id = user.get_id()
+            token = user.get_token()
+        else:
+            user_id, token = create_new_user(name=name, email=email, password=password)
     except Exception as e:
         print(e)
-        user = User(name=name, email=email, password=password)
-        db.session.add(user)
-        db.session.commit()
-        token = user.get_token()
+        user_id, token = create_new_user(name=name, email=email, password=password)
 
     return {
         "token": token,
-        "user_id": user.get_id()
+        "user_id": user_id
         }

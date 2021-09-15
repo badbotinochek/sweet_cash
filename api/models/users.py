@@ -1,11 +1,9 @@
 
 import bcrypt
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
-
-db = SQLAlchemy()
+from db import db
 
 
 class User(db.Model):
@@ -36,6 +34,8 @@ class User(db.Model):
     @classmethod
     def authenticate(cls, email: str, password: str):
         user = cls.query.filter(cls.email == email).first()
+        if user is None:
+            return None
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         if bcrypt.checkpw(hashed, user.password.encode("utf-8")):
             raise Exception('No user with this password')

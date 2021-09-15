@@ -1,20 +1,23 @@
 
 from flask import Flask
 from flask_jwt_extended import JWTManager
-from api.models.users import db
 
+from db import db
 from config import Config
+
+app = Flask(__name__)
 
 
 def create_app():
-
+    # import routes
     from api.routes.auth import auth_api
-
-    app = Flask(__name__)
 
     # db
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
     db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
 
     # jwt
     app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
