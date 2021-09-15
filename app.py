@@ -1,19 +1,9 @@
 
 from flask import Flask
-import sqlalchemy as db
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from flask_jwt_extended import JWTManager
+from api.models.users import db
 
-import config
-
-
-engine = create_engine('sqlite:///db.sqlite')
-session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
-Base = declarative_base()
-Base.query = session.query_property()
-Base.metadata.create_all(bind=engine)
+from config import Config
 
 
 def create_app():
@@ -21,12 +11,14 @@ def create_app():
     from api.routes.auth import auth_api
 
     app = Flask(__name__)
-    app.config.from_object(config)
-    jwt = JWTManager(app)
 
-    @app.teardown_appcontext
-    def shutdown_session(exseption=None):
-        session.remove()
+    # db
+    app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
+    db.init_app(app)
+
+    # jwt
+    app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
+    jwt = JWTManager(app)
 
     app.register_blueprint(auth_api)
 
