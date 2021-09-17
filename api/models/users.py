@@ -32,11 +32,10 @@ class User(db.Model):
         return self.id
 
     @classmethod
-    def authenticate(cls, email: str, password: str):
-        user = cls.query.filter(cls.email == email).first()
-        if user is None:
-            return None
-        hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        if bcrypt.checkpw(hashed, user.password.encode("utf-8")):
-            raise Exception('No user with this password')
-        return user
+    def get_user(cls, email: str) -> db.Model:
+        result = cls.query.filter(cls.email == email).first()
+        return result
+
+    def check_password(self, password: str) -> bool:
+        result = bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+        return result

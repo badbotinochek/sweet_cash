@@ -1,8 +1,40 @@
 
-from flask import jsonify
+from flask import jsonify, Blueprint
+from app import app
 
 
-class Error:
+blueprint = Blueprint('error_handlers', __name__)
+
+
+class APIError(Exception):
+    """All custom API Exceptions"""
+    pass
+
+
+class APIAuthError(APIError):
+    """Custom Authentication Error Class."""
+    code = 403
+    description = "Authentication Error"
+
+
+class APIParamError(APIError):
+    """Custom Request Parameters Error Class."""
+    code = 400
+    description = "Request parameters Error"
+
+
+@blueprint.app_errorhandler(APIError)
+def handle_exception(err):
+    """Return custom JSON when APIError or its children are raised"""
+    response = {"error": err.description, "message": ""}
+    if len(err.args) > 0:
+        response["message"] = err.args[0]
+    # Add some logging so that we can monitor different types of errors
+    app.logger.error(f'{err.description}: {response["message"]}')
+    return jsonify(response), err.code
+
+
+class Error(object):
 
     def __init__(self, msg, code=None, status=200, data=None):
         self.code = code

@@ -4,11 +4,13 @@ from flask_jwt_extended import JWTManager
 
 from db import db
 from config import Config
+import api.errors as error
 
 app = Flask(__name__)
 
 
 def create_app():
+
     # import routes
     from api.routes.auth import auth_api
 
@@ -24,6 +26,7 @@ def create_app():
     jwt = JWTManager(app)
 
     app.register_blueprint(auth_api)
+    app.register_blueprint(error.blueprint)
 
     return app
 
@@ -31,7 +34,7 @@ def create_app():
 if __name__ == '__main__':
     try:
         app = create_app()
-        app.run()
+        app.run(debug=True)
     except Exception as e:
         print(e)
 
