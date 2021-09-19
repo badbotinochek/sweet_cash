@@ -1,6 +1,5 @@
 
 from flask import jsonify, Blueprint
-from app import app
 
 
 blueprint = Blueprint('error_handlers', __name__)
@@ -29,8 +28,6 @@ def handle_exception(err):
     response = {"error": err.description, "message": ""}
     if len(err.args) > 0:
         response["message"] = err.args[0]
-    # Add some logging so that we can monitor different types of errors
-    app.logger.error(f'{err.description}: {response["message"]}')
     return jsonify(response), err.code
 
 

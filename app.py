@@ -4,12 +4,14 @@ from flask_jwt_extended import JWTManager
 
 from db import db
 from config import Config
-import api.errors as error
+
 
 app = Flask(__name__)
 
 
 def create_app():
+    # import errors
+    import api.errors as error
 
     # import routes
     from api.routes.auth import auth_api
