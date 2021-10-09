@@ -15,6 +15,7 @@ def create_app():
 
     # import routes
     from api.routes.auth import auth_api
+    from api.routes.transactions import transactions_api
 
     # db
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
@@ -28,6 +29,7 @@ def create_app():
     jwt = JWTManager(app)
 
     app.register_blueprint(auth_api)
+    app.register_blueprint(transactions_api)
     app.register_blueprint(error.blueprint)
 
     return app
