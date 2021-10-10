@@ -1,3 +1,5 @@
+import datetime
+
 from db import db
 
 
@@ -5,12 +7,19 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Integer(150), nullable=False)
-    name = db.Column(db.String(250), nullable=False)
-    count = db.Column(db.Integer(150), nullable=False)
+    type = db.Column(db.Integer, nullable=False)
+    category = db.Column(db.Integer, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    transaction_date = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    description = db.Column(db.String(250), nullable=False)
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type')
-        self.name = kwargs.get('name')
-        self.count = kwargs.get('count')
+        self.category = kwargs.get('category')
+        self.amount = kwargs.get('amount')
+        self.transaction_date = kwargs.get('transaction_date')
+        self.description = kwargs.get('description')
 
+    def get_id(self):
+        return self.id
