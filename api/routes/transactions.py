@@ -65,7 +65,7 @@ def get_transactions(limit=100, offset=0):
         user_id = Session.get_user_id(token=request.headers["Authorization"])
 
         if user_id is not None:
-            transactions = Transaction.get_transactions(user_id=int(user_id),
+            transactions = Transaction.get_transactions(user_id=int(user_id), 
                                                         offset=int(offset), 
                                                         limit=int(limit))
 
