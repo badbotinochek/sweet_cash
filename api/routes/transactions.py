@@ -1,4 +1,5 @@
 from flask import request, jsonify, Blueprint
+from flask_jwt_extended import jwt_required
 
 from api.validator import jsonbody, query_params
 from api.models.session import Session
@@ -10,6 +11,7 @@ transactions_api = Blueprint('transactions', __name__)
 
 
 @transactions_api.route('/api/v1/transaction', methods=['POST'])
+@jwt_required()
 @jsonbody(type=(int, "required"),
           category=(int, "required"),
           amount=(float, "required"),
