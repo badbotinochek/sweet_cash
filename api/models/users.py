@@ -1,7 +1,5 @@
 
 import bcrypt
-from flask_jwt_extended import create_access_token
-from datetime import timedelta
 
 from db import db
 
@@ -21,12 +19,6 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User(name='{}', email='{}', password={}".format(self.name, self.email, self.password)
-
-    def get_token(self, expire_time=24):
-        expire_delta = timedelta(expire_time)
-        token = create_access_token(
-            identity=self.id, expires_delta=expire_delta)
-        return token
 
     def get_id(self):
         return self.id
