@@ -27,10 +27,20 @@ class Transaction(db.Model):
         return self.id
 
     @classmethod
-    def get_transactions(cls, user_id, offset=0, limit=100):
+    def get_transactions(cls, user_id: int, offset=0, limit=100):
         query = cls.query.filter(cls.user_id == user_id)
         if limit:
             query = query.limit(limit)
         if offset:
             query = query.offset(limit * offset)
         return query
+
+    @classmethod
+    def get_transaction(cls, transaction_id: int, user_id: int):
+        transaction = cls.query.filter(cls.id == transaction_id, cls.user_id == user_id).first()
+        return transaction
+
+    @classmethod
+    def delete_transaction(cls, transaction_id: int):
+        cls.query.filter(cls.id == transaction_id).delete()
+        db.session.commit()
