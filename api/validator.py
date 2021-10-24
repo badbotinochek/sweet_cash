@@ -4,8 +4,10 @@ from flask import request
 import api.errors as error
 
 
-def clear_data(data: dict, **kwargs) -> dict:
-    data = {k: data[k] for k, v in kwargs.items()}
+def clear_data(data: dict, **kwargs):
+    if data is None:
+        return None
+    data = {k: data[k] for k, v in kwargs.items() if k in data}
     return data
 
 
@@ -40,7 +42,7 @@ def query_params(*args, **kwargs):
                 parameter = request.args.get(k)
                 if parameter is None and v[1] == "required":
                     return error.BadParams(f'{k} is required')
-                if type(parameter) is not v[0]:
+                if parameter is not None and type(parameter) is not v[0]:
                     return error.BadParams(f'Invalid type for {k}')
             params = {a: request.args.get(a) for a in request.args}
             data = clear_data(params, **kwargs)
