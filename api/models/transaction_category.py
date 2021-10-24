@@ -18,3 +18,19 @@ class TransactionCategory(db.Model):
     def get_id(self):
         return self.id
 
+    @classmethod
+    def get(cls, category_id: int):
+        transaction_category = cls.query.filter(cls.id == category_id).first()
+        return transaction_category
+
+    @classmethod
+    def get_name(cls, category_id: int):
+        transaction_category = cls.query.filter(cls.id == category_id).first()
+        if transaction_category is not None:
+            return transaction_category.name
+        return transaction_category
+
+    @classmethod
+    def get_transactions_categories(cls):
+        query = cls.query.filter()
+        return query

@@ -15,3 +15,20 @@ class TransactionType(db.Model):
 
     def get_id(self):
         return self.id
+
+    @classmethod
+    def get(cls, type_id: int):
+        transaction_type = cls.query.filter(cls.id == type_id).first()
+        return transaction_type
+
+    @classmethod
+    def get_name(cls, type_id: int):
+        transaction_type = cls.query.filter(cls.id == type_id).first()
+        if transaction_type is not None:
+            return transaction_type.name
+        return transaction_type
+
+    @classmethod
+    def get_transactions_types(cls):
+        query = cls.query.filter()
+        return query

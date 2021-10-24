@@ -22,6 +22,12 @@ class APIParamError(APIError):
     description = "Request parameters Error"
 
 
+class APIValueNotFound(APIError):
+    """Custom Request Parameters Error Class."""
+    code = 404
+    description = "Nof found"
+
+
 @blueprint.app_errorhandler(APIError)
 def handle_exception(err):
     """Return custom JSON when APIError or its children are raised"""
