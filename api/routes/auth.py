@@ -2,12 +2,15 @@
 from flask import jsonify, Blueprint
 from datetime import datetime
 import re
+import logging
 
 from db import db
 from api.validator import jsonbody
 from api.models.users import User
 from api.models.session import Session
 import api.errors as error
+
+logger = logging.getLogger(name="auth")
 
 auth_api = Blueprint('login', __name__)
 
@@ -24,21 +27,24 @@ def login(email: str, password: str):
     if user is None:
         user_id = create_new_user(name=email, email=email, password=password)
         token = new_token(user_id=user_id, login_method='email')
-        return jsonify({"access_token": token,
-                        "user_id": user_id}), 200
     else:
         if not user.check_password(password):
+            logger.info(f'User {user.get_id()} with email {email} try to login with wrong password')
             raise error.APIAuthError('Wrong password')
         user_id = user.get_id()
         token = new_token(user_id=user_id, login_method='email')
-        return jsonify({"access_token": token,
-                        "user_id": user_id}), 200
+
+    logger.info(f'User {user_id} login with email {email}')
+
+    return jsonify({"access_token": token,
+                    "user_id": user_id}), 200
 
 
 def create_new_user(name: str, email: str, password: str):
     u = User(name=name, email=email, password=password)
     db.session.add(u)
     db.session.commit()
+    logger.info(f'Create new user {u.get_id()} with email {email}')
     return u.get_id()
 
 
