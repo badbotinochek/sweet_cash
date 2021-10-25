@@ -32,3 +32,8 @@ class TransactionType(db.Model):
     def get_transactions_types(cls):
         query = cls.query.filter()
         return query
+
+    @classmethod
+    def get_name2(cls, name: str) -> db.Model:
+        result = cls.query.filter(cls.name == name).first()
+        return result.name

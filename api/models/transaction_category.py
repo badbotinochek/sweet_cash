@@ -30,7 +30,4 @@ class TransactionCategory(db.Model):
             return transaction_category.name
         return transaction_category
 
-    @classmethod
-    def get_transactions_categories(cls):
-        query = cls.query.filter()
-        return query
+
