@@ -25,7 +25,7 @@ class APIParamError(APIError):
 class APIValueNotFound(APIError):
     """Custom Request Parameters Error Class."""
     code = 404
-    description = "Nof found"
+    description = "Not found"
 
 
 @blueprint.app_errorhandler(APIError)

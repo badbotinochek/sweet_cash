@@ -3,8 +3,8 @@ import pytest
 import requests
 
 HOST = 'http://127.0.0.1:5000'
-EMAIL = "test@test.com"
-PASSWORD = "test"
+EMAIL = "test1@test.com"
+PASSWORD = "1@yAndexru"
 
 
 def test_login_success():
@@ -14,7 +14,7 @@ def test_login_success():
             "email": EMAIL,
             "password": PASSWORD
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
@@ -27,9 +27,9 @@ def test_login_wrong_password():
         HOST + "/api/v1/login",
         json={
             "email": EMAIL,
-            "password": "wrong"
+            "password": "1@yAndexru23"
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 403
     assert response.headers["Content-Type"] == "application/json"
@@ -46,7 +46,7 @@ def test_login_invalid_email_format():
             "email": "test",
             "password": PASSWORD
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -62,7 +62,7 @@ def test_login_without_email():
         json={
             "password": PASSWORD
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -79,7 +79,7 @@ def test_login_without_password():
         json={
             "email": EMAIL
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -97,7 +97,7 @@ def test_login_wrong_email_type():
             "email": 1,
             "password": PASSWORD
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -115,7 +115,7 @@ def test_login_wrong_password_type():
             "email": EMAIL,
             "password": 1
         },
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -147,7 +147,7 @@ def test_login_without_body():
 #               "email": "ag881.pst@gmail.com",
 #               "password": "rksm911911Hh"
 #              },
-#         headers={"Content-Type": "application/json"},
+#                 headers={"Content-Type": "application/json"},
 #     )
 #     assert response.status_code == 200
 #     # assert response.json == {"result": True}

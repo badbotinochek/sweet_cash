@@ -26,9 +26,9 @@ def formatting(t: TransactionType) -> dict:
 @transactions_types_api.route('/api/v1/transaction_type', methods=['POST'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
-          description=(str, "required"))
+          description=(str, None))
 def create_transactions(name: str,
-                        description: str):
+                        description=None):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -37,8 +37,12 @@ def create_transactions(name: str,
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    t = TransactionType(name=name,
-                        description=description)
+    if description is None:
+        t = TransactionType(name=name)
+    else:
+        t = TransactionType(name=name,
+                            description=description)
+
     db.session.add(t)
     db.session.commit()
 
@@ -46,9 +50,11 @@ def create_transactions(name: str,
     return jsonify(formatting(t)), 200
 
 
-@transactions_types_api.route('/api/v1/transactions_types/all', methods=['GET'])
+@transactions_types_api.route('/api/v1/transactions_types', methods=['GET'])
 @jwt_required()
-def get_transactions_types():
+@query_params(limit=(str, None),
+              offset=(str, None))
+def get_transactions_types(limit=100, offset=0):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -57,7 +63,8 @@ def get_transactions_types():
         logger.warning(f'User {user_id} is trying to get all transaction type without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transactions_types = TransactionType.get_transactions_types()
+    transactions_types = TransactionType.get_transactions_types(limit=int(limit),
+                                                                offset=int(offset))
 
     transactions_types = [formatting(t) for t in transactions_types]
 
@@ -68,12 +75,10 @@ def get_transactions_types():
 @transactions_types_api.route('/api/v1/transaction_type/<int:transaction_type_id>', methods=['PUT'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
-          description=(str, "required"),
-          deleted=(str, "required"))
+          description=(str, None))
 def update_transaction_type(transaction_type_id: int,
                             name: str,
-                            deleted: str,
-                            description: str):
+                            description=None):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -88,8 +93,8 @@ def update_transaction_type(transaction_type_id: int,
         raise error.APIValueNotFound(f'transaction_type {transaction_type_id} not found')
 
     transaction_type.name = name
-    transaction_type.description = description
-    transaction_type.deleted = deleted
+    if description is not None:
+        transaction_type.description = description
 
     db.session.commit()
 

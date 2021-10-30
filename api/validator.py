@@ -21,7 +21,7 @@ def jsonbody(*args, **kwargs):
                 parameter = request.json.get(k)
                 if parameter is None and v[1] == "required":
                     return error.BadParams(f'{k} is required')
-                if type(parameter) is not v[0]:
+                if parameter is not None and type(parameter) is not v[0]:
                     return error.BadParams(f'Invalid type for {k}')
             data = clear_data(request.json, **kwargs)
             data.update(other_params)

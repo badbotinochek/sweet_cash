@@ -27,6 +27,11 @@ class Transaction(db.Model):
         return self.id
 
     @classmethod
+    def get(cls, transaction_id: int, user_id: int):
+        transaction = cls.query.filter(cls.id == transaction_id, cls.user_id == user_id).first()
+        return transaction
+
+    @classmethod
     def get_transactions(cls, user_id: int, offset=0, limit=100):
         query = cls.query.filter(cls.user_id == user_id)
         if limit:

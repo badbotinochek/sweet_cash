@@ -9,10 +9,9 @@ from api.models.transaction import Transaction
 from api.models.transaction_type import TransactionType
 from api.models.transaction_category import TransactionCategory
 from db import db
-import api.errors as error
+
 
 logger = logging.getLogger(name="transactions")
-
 
 transactions_api = Blueprint('transactions', __name__)
 
@@ -36,12 +35,12 @@ def formatting(t: Transaction) -> dict:
           category=(int, "required"),
           amount=(float, "required"),
           transaction_date=(str, "required"),
-          description=(str, "required"))
+          description=(str, None))
 def create_transactions(type: int,
                         category: int,
                         amount: float,
                         transaction_date: str,
-                        description: str):
+                        description=''):
     """Create new user transaction
 
         Returns 401 if
@@ -82,7 +81,7 @@ def create_transactions(type: int,
 
     if amount < 0 or amount > 999999999999:
         logger.warning(f'User {user_id} is trying to create transaction with invalid amount {amount}')
-        raise error.APIValueNotFound(f'Amount must be from 0 to 999 999 999 999')
+        raise error.APIParamError(f'Amount must be from 0 to 999 999 999 999')
 
     t = Transaction(type=type,
                     user_id=user_id,
@@ -98,7 +97,7 @@ def create_transactions(type: int,
     return jsonify(formatting(t)), 200
 
 
-@transactions_api.route('/api/v1/transaction/all', methods=['GET'])
+@transactions_api.route('/api/v1/transactions', methods=['GET'])
 @jwt_required()
 @query_params(limit=(str, None),
               offset=(str, None))
@@ -132,7 +131,7 @@ def get_transaction(transaction_id: int):
         logger.warning(f'User {user_id} is trying to get transaction {transaction_id} without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transaction = Transaction.get_transaction(transaction_id=transaction_id, user_id=int(user_id))
+    transaction = Transaction.get(transaction_id=transaction_id, user_id=int(user_id))
     if transaction is None:
         logger.warning(f'User {user_id} is trying to get a non-existent transaction {transaction_id}')
         raise error.APIValueNotFound(f'Transaction {transaction_id} not found')
@@ -148,13 +147,13 @@ def get_transaction(transaction_id: int):
           category=(int, "required"),
           amount=(float, "required"),
           transaction_date=(str, "required"),
-          description=(str, "required"))
+          description=(str, None))
 def update_transaction(transaction_id: int,
                        type: int,
                        category: int,
                        amount: float,
                        transaction_date: str,
-                       description: str):
+                       description=''):
 
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -163,7 +162,7 @@ def update_transaction(transaction_id: int,
         logger.warning(f'User {user_id} is trying to update transaction {transaction_id} without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transaction = Transaction.get_transaction(transaction_id=transaction_id, user_id=int(user_id))
+    transaction = Transaction.get(transaction_id=transaction_id, user_id=int(user_id))
     if transaction is None:
         logger.warning(f'User {user_id} is trying to update a non-existent transaction {transaction_id}')
         raise error.APIValueNotFound(f'Transaction {transaction_id} not found')
@@ -180,7 +179,7 @@ def update_transaction(transaction_id: int,
 
     if amount < 0 or amount > 999999999999:
         logger.warning(f'User {user_id} is trying to create transaction with invalid amount {amount}')
-        raise error.APIValueNotFound(f'Amount must be from 0 to 999 999 999 999')
+        raise error.APIParamError(f'Amount must be from 0 to 999 999 999 999')
 
     transaction.type = type
     transaction.category = category
@@ -206,7 +205,7 @@ def delete_transaction(transaction_id: int):
         logger.warning(f'User {user_id} is trying to delete transaction {transaction_id} without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transaction = Transaction.get_transaction(transaction_id=transaction_id, user_id=int(user_id))
+    transaction = Transaction.get(transaction_id=transaction_id, user_id=int(user_id))
     if transaction is None:
         logger.warning(f'User {user_id} is trying to delete a non-existent transaction {transaction_id}')
         raise error.APIValueNotFound(f'Transaction {transaction_id} not found')

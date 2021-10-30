@@ -30,4 +30,11 @@ class TransactionCategory(db.Model):
             return transaction_category.name
         return transaction_category
 
-
+    @classmethod
+    def get_transactions_category(cls, offset=0, limit=100):
+        query = cls.query.filter()
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(limit * offset)
+        return query
