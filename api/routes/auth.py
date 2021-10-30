@@ -5,7 +5,7 @@ import re
 import logging
 
 from db import db
-from api.validator import jsonbody
+from api.validator import jsonbody, features
 from api.models.users import User
 from api.models.session import Session
 import api.errors as error
@@ -16,8 +16,8 @@ auth_api = Blueprint('login', __name__)
 
 
 @auth_api.route('/api/v1/login', methods=['POST'])
-@jsonbody(email=(str, "required"),
-          password=(str, "required"))
+@jsonbody(email=features(type=str, required=True),
+          password=features(type=str, required=True))
 def login(email: str, password: str):
     if not check_email_format(email):
         raise error.APIParamError('Invalid email format')

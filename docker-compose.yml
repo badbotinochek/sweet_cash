@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+    app:
+        # Путь до Dockerfile
+        build: .
+        # Имя для создаваемого контейнера
+        container_name: sweet_cash-app
+        # Создание переменных окружения в контейнере
+        environment:
+          # для отладки (при запуске в релиз убрать!)
+            - FLASK_ENV=development
+          ## Позволяет отслеживать процесс работы приложения в командной строке
+            - PYTHONUNBUFFERED=True
+        # Перезапускаем сервис в случае падения
+        restart: on-failure
+        # Порт, который будет смотреть наружу : порт который используется внутри контейнера
+        ports:
+            - 5000:5000
+        depends_on:
+            - app_pg
+
+    app_pg:
+        image: postgres:latest
+        container_name: sweet_cash-db
+        ports:
+            - 5432:5432
+        environment:
+            - POSTGRES_DB=postgres
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=911911
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:

@@ -3,7 +3,7 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params
+from api.validator import jsonbody, query_params, features
 from api.models.session import Session
 from api.models.transaction import Transaction
 from api.models.transaction_type import TransactionType
@@ -31,11 +31,11 @@ def formatting(t: Transaction) -> dict:
 
 @transactions_api.route('/api/v1/transaction', methods=['POST'])
 @jwt_required()
-@jsonbody(type=(int, "required"),
-          category=(int, "required"),
-          amount=(float, "required"),
-          transaction_date=(str, "required"),
-          description=(str, None))
+@jsonbody(type=features(type=int, required=True),
+          category=features(type=int, required=True),
+          amount=features(type=float, required=True),
+          transaction_date=features(type=str, required=True),
+          description=features(type=str))
 def create_transactions(type: int,
                         category: int,
                         amount: float,
@@ -99,8 +99,8 @@ def create_transactions(type: int,
 
 @transactions_api.route('/api/v1/transactions', methods=['GET'])
 @jwt_required()
-@query_params(limit=(str, None),
-              offset=(str, None))
+@query_params(limit=features(type=str),
+              offset=features(type=str))
 def get_transactions(limit=100, offset=0):
 
     token = request.headers["Authorization"].split('Bearer ')[1]
@@ -143,11 +143,11 @@ def get_transaction(transaction_id: int):
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['PUT'])
 @jwt_required()
-@jsonbody(type=(int, "required"),
-          category=(int, "required"),
-          amount=(float, "required"),
-          transaction_date=(str, "required"),
-          description=(str, None))
+@jsonbody(type=features(type=int, required=True),
+          category=features(type=int, required=True),
+          amount=features(type=float, required=True),
+          transaction_date=features(type=str, required=True),
+          description=features(type=str))
 def update_transaction(transaction_id: int,
                        type: int,
                        category: int,

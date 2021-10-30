@@ -44,6 +44,6 @@ def create_app():
 if __name__ == '__main__':
     try:
         app = create_app()
-        app.run(debug=True)
+        app.run(debug=True, host='0.0.0.0')
     except Exception as e:
         print(e)
