@@ -29,3 +29,12 @@ class TransactionCategory(db.Model):
         if transaction_category is not None:
             return transaction_category.name
         return transaction_category
+
+    @classmethod
+    def get_transaction_categories(cls, offset=0, limit=100):
+        query = cls.query.filter()
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(limit * offset)
+        return query

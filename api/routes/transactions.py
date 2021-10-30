@@ -11,6 +11,7 @@ from api.models.transaction_category import TransactionCategory
 from db import db
 import api.errors as error
 
+
 logger = logging.getLogger(name="transactions")
 
 transactions_api = Blueprint('transactions', __name__)

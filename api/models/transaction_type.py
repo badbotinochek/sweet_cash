@@ -27,3 +27,13 @@ class TransactionType(db.Model):
         if transaction_type is not None:
             return transaction_type.name
         return transaction_type
+
+    @classmethod
+    def get_transaction_types(cls, offset=0, limit=100):
+        query = cls.query.filter()
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(limit * offset)
+        return query
+

@@ -3,8 +3,8 @@ import pytest
 import requests
 
 HOST = 'http://127.0.0.1:5000'
-EMAIL = "test@test.com"
-PASSWORD = "test"
+EMAIL = "test1@test.com"
+PASSWORD = "1@yAndexru"
 
 TOKEN = requests.post(
     HOST + "/api/v1/login",
