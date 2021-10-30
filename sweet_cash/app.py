@@ -7,7 +7,7 @@ from db import db
 from config import Config
 
 
-logging.basicConfig(filename="logs.log",
+logging.basicConfig(filename="../logs.log",
                     level=logging.INFO,
                     format='%(levelname)s:%(name)s:%(asctime)s: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')

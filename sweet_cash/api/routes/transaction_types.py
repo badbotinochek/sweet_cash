@@ -2,7 +2,7 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params
+from api.validator import jsonbody, query_params, features
 from api.models.session import Session
 from api.models.transaction_type import TransactionType
 from db import db
@@ -24,8 +24,8 @@ def formatting(t: TransactionType) -> dict:
 
 @transaction_types_api.route('/api/v1/transaction_type', methods=['POST'])
 @jwt_required()
-@jsonbody(name=(str, "required"),
-          description=(str, None))
+@jsonbody(name=features(type=str, required=True),
+          description=features(type=str))
 def create_transactions(name: str,
                         description=None):
     # Get user_id by request token
@@ -51,8 +51,8 @@ def create_transactions(name: str,
 
 @transaction_types_api.route('/api/v1/transactions_types', methods=['GET'])
 @jwt_required()
-@query_params(limit=(str, None),
-              offset=(str, None))
+@query_params(limit=features(type=str),
+              offset=features(type=str))
 def get_transactions_types(limit=100, offset=0):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
@@ -73,8 +73,8 @@ def get_transactions_types(limit=100, offset=0):
 
 @transaction_types_api.route('/api/v1/transaction_type/<int:transaction_type_id>', methods=['PUT'])
 @jwt_required()
-@jsonbody(name=(str, "required"),
-          description=(str, None))
+@jsonbody(name=features(type=str, required=True),
+          description=features(type=str))
 def update_transaction_type(transaction_type_id: int,
                             name: str,
                             description=None):
