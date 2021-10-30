@@ -42,6 +42,11 @@ class Transaction(db.Model):
         return query
 
     @classmethod
+    def get_transaction(cls, transaction_id: int, user_id: int):
+        transaction = cls.query.filter(cls.id == transaction_id, cls.user_id == user_id).first()
+        return transaction
+
+    @classmethod
     def delete_transaction(cls, transaction_id: int):
         cls.query.filter(cls.id == transaction_id).delete()
         db.session.commit()

@@ -22,6 +22,9 @@ def login(email: str, password: str):
     if not check_email_format(email):
         raise error.APIParamError('Invalid email format')
 
+    if not check_password_format(password):
+        raise error.APIParamError('Invalid password format')
+
     user = User.get_user(email)
 
     if user is None:
@@ -51,6 +54,12 @@ def create_new_user(name: str, email: str, password: str):
 def check_email_format(email: str):
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     result = re.fullmatch(regex, email)
+    return result
+
+
+def check_password_format(password: str):
+    regex = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
+    result = re.fullmatch(regex, password)
     return result
 
 
