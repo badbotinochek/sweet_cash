@@ -9,6 +9,7 @@ from api.models.transaction import Transaction
 from api.models.transaction_type import TransactionType
 from api.models.transaction_category import TransactionCategory
 from db import db
+import api.errors as error
 
 
 logger = logging.getLogger(name="transactions")

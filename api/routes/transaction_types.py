@@ -8,22 +8,21 @@ from api.models.transaction_type import TransactionType
 from db import db
 import api.errors as error
 
-logger = logging.getLogger(name="transactions_types")
+logger = logging.getLogger(name="transaction_types")
 
-transactions_types_api = Blueprint('transactions_types', __name__)
+transaction_types_api = Blueprint('transaction_types', __name__)
 
 
 def formatting(t: TransactionType) -> dict:
     formatted_type = {
         "id": t.id,
         "name": t.name,
-        "description": t.description,
-        "deleted": t.deleted
+        "description": t.description
     }
     return formatted_type
 
 
-@transactions_types_api.route('/api/v1/transaction_type', methods=['POST'])
+@transaction_types_api.route('/api/v1/transaction_type', methods=['POST'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
           description=(str, None))
@@ -50,7 +49,7 @@ def create_transactions(name: str,
     return jsonify(formatting(t)), 200
 
 
-@transactions_types_api.route('/api/v1/transactions_types', methods=['GET'])
+@transaction_types_api.route('/api/v1/transactions_types', methods=['GET'])
 @jwt_required()
 @query_params(limit=(str, None),
               offset=(str, None))
@@ -63,8 +62,8 @@ def get_transactions_types(limit=100, offset=0):
         logger.warning(f'User {user_id} is trying to get all transaction type without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transactions_types = TransactionType.get_transactions_types(limit=int(limit),
-                                                                offset=int(offset))
+    transactions_types = TransactionType.get_transaction_types(limit=int(limit),
+                                                               offset=int(offset))
 
     transactions_types = [formatting(t) for t in transactions_types]
 
@@ -72,7 +71,7 @@ def get_transactions_types(limit=100, offset=0):
     return jsonify(transactions_types), 200
 
 
-@transactions_types_api.route('/api/v1/transaction_type/<int:transaction_type_id>', methods=['PUT'])
+@transaction_types_api.route('/api/v1/transaction_type/<int:transaction_type_id>', methods=['PUT'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
           description=(str, None))
@@ -90,7 +89,7 @@ def update_transaction_type(transaction_type_id: int,
     transaction_type = TransactionType.get(type_id=transaction_type_id)
     if transaction_type is None:
         logger.warning(f'User {user_id} is trying to update a non-existent transaction type {transaction_type_id}')
-        raise error.APIValueNotFound(f'transaction_type {transaction_type_id} not found')
+        raise error.APIValueNotFound(f'Transaction type {transaction_type_id} not found')
 
     transaction_type.name = name
     if description is not None:

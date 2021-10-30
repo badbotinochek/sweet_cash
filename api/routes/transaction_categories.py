@@ -8,9 +8,9 @@ from api.models.transaction_category import TransactionCategory
 from db import db
 import api.errors as error
 
-logger = logging.getLogger(name="transactions_category")
+logger = logging.getLogger(name="transaction_categories")
 
-transactions_category_api = Blueprint('transactions_category', __name__)
+transaction_categories_api = Blueprint('transaction_categories', __name__)
 
 
 def formatting(t: TransactionCategory) -> dict:
@@ -18,13 +18,12 @@ def formatting(t: TransactionCategory) -> dict:
         "id": t.id,
         "name": t.name,
         "parent_category_id": t.parent_category_id,
-        "description": t.description,
-        "deleted": t.deleted
+        "description": t.description
     }
     return formatted_transactions_category
 
 
-@transactions_category_api.route('/api/v1/transactions_category', methods=['POST'])
+@transaction_categories_api.route('/api/v1/transactions_category', methods=['POST'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
           parent_category_id=(int, "required"),
@@ -50,7 +49,7 @@ def create_transactions_category(name: str,
     return jsonify(formatting(t)), 200
 
 
-@transactions_category_api.route('/api/v1/transactions/categories', methods=['GET'])
+@transaction_categories_api.route('/api/v1/transactions/categories', methods=['GET'])
 @jwt_required()
 @query_params(limit=(str, None),
               offset=(str, None))
@@ -63,8 +62,8 @@ def get_transactions_categories(limit=100, offset=0):
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
         raise error.APIAuthError('User is not authorized')
 
-    transactions_categories = TransactionCategory.get_transactions_category(limit=int(limit),
-                                                                            offset=int(offset))
+    transactions_categories = TransactionCategory.get_transaction_categories(limit=int(limit),
+                                                                             offset=int(offset))
 
     transactions_categories = [formatting(t) for t in transactions_categories]
     print(transactions_categories)
@@ -74,7 +73,7 @@ def get_transactions_categories(limit=100, offset=0):
     return jsonify(transactions_categories), 200
 
 
-@transactions_category_api.route('/api/v1/transactions_category/<int:transactions_category_id>', methods=['PUT'])
+@transaction_categories_api.route('/api/v1/transactions_category/<int:transactions_category_id>', methods=['PUT'])
 @jwt_required()
 @jsonbody(name=(str, "required"),
           parent_category_id=(int, None),
@@ -93,8 +92,9 @@ def update_transactions_category(transactions_category_id: int,
 
     transactions_category = TransactionCategory.get(category_id=transactions_category_id)
     if transactions_category is None:
-        logger.warning(f'User {user_id} is trying to update a non-existent transaction category {transaction_type_id}')
-        raise error.APIValueNotFound(f'transactions_category {category_id} not found')
+        logger.warning(f'User {user_id} is trying to update a '
+                       f'non-existent transaction category {transactions_category_id}')
+        raise error.APIValueNotFound(f'Transaction category {transactions_category_id} not found')
 
     if description != '':
         transactions_category.description = description

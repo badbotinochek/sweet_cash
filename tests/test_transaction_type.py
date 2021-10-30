@@ -121,44 +121,6 @@ def test_create_transaction_type_wrong_type_name():
     }
 
 
-def test_create_transaction_type_wrong_type_name_1():
-    response = requests.post(
-        HOST + "/api/v1/transaction_type",
-        json={
-            "name": -1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_create_transaction_type_wrong_type_name_2():
-    response = requests.post(
-        HOST + "/api/v1/transaction_type",
-        json={
-            "name": 1.1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
 def test_create_transaction_type_wrong_type_description():
     response = requests.post(
         HOST + "/api/v1/transaction_type",
@@ -178,27 +140,8 @@ def test_create_transaction_type_wrong_type_description():
     }
 
 
-def test_create_transaction_type_wrong_type_description_1():
-    response = requests.post(
-        HOST + "/api/v1/transaction_type",
-        json={
-            "name": "1",
-            "description": 1.2
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for description",
-        "status": 400
-    }
-
-
 '''
-TEST GETTING ALL TRANSACTION
+TEST GETTING ALL TRANSACTION TYPES
 '''
 
 
@@ -213,7 +156,6 @@ def test_get_transactions_type_success():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
 
 
 def test_get_transactions_type_success_with_limit():
@@ -228,7 +170,6 @@ def test_get_transactions_type_success_with_limit():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
 
 
 def test_get_transactions_type_success_with_offset():
@@ -242,7 +183,6 @@ def test_get_transactions_type_success_with_offset():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
 
 
 def test_get_transactions_type_success_with_limit_and_offset():
@@ -257,7 +197,6 @@ def test_get_transactions_type_success_with_limit_and_offset():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
 
 
 def test_get_transactions_type_without_valid_token():
@@ -269,7 +208,7 @@ def test_get_transactions_type_without_valid_token():
 
 
 '''
-TEST UPDATING TRANSACTION
+TEST UPDATING TRANSACTION TYPE
 '''
 
 
@@ -288,7 +227,6 @@ def test_update_transaction_type_success():
     assert "id" in response.json()
     assert "name" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
 
 
 def test_update_transaction_type_without_valid_token():
@@ -350,24 +288,7 @@ def test_update_transaction_type_without_description():
     assert "id" in response.json()
     assert "name" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
-
-
-def test_update_transaction_type_without_deleted():
-    response = requests.put(
-        HOST + "/api/v1/transaction_type/" + TRANSACTION_TYPE_ID,
-        json={
-            "name": "1"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert "id" in response.json()
-    assert "name" in response.json()
-    assert "description" in response.json()
-    assert "deleted" in response.json()
+    assert "description" == response.json()["description"]
 
 
 def test_update_transaction_type_wrong_type_name():
@@ -375,44 +296,6 @@ def test_update_transaction_type_wrong_type_name():
         HOST + "/api/v1/transaction_type/" + TRANSACTION_TYPE_ID,
         json={
             "name": 1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_update_transaction_type_wrong_type_name_1():
-    response = requests.put(
-        HOST + "/api/v1/transaction_type/" + TRANSACTION_TYPE_ID,
-        json={
-            "name": -1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_update_transaction_type_wrong_type_name_2():
-    response = requests.put(
-        HOST + "/api/v1/transaction_type/" + TRANSACTION_TYPE_ID,
-        json={
-            "name": 1.1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -443,4 +326,22 @@ def test_update_transaction_type_wrong_type_description():
         "error_code": "bad-params",
         "message": "Invalid type for description",
         "status": 400
+    }
+
+
+def test_update_transaction_type_with_invalid_transaction_type_id():
+    response = requests.put(
+        HOST + "/api/v1/transaction_type/0",
+        json={
+            "name": "1",
+            "description": "1"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Transaction type 0 not found"
     }

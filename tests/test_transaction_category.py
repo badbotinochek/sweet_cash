@@ -41,7 +41,6 @@ def test_create_transaction_category_success():
     assert "name" in response.json()
     assert "parent_category_id" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
     TRANSACTION_CATEGORY_ID = str(response.json()["id"])
 
 
@@ -108,7 +107,6 @@ def test_create_transaction_category_without_description():
     assert "name" in response.json()
     assert "parent_category_id" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
 
 
 def test_create_transaction_category_without_parent_category():
@@ -149,70 +147,12 @@ def test_create_transaction_category_wrong_type_name():
     }
 
 
-def test_create_transaction_category_wrong_type_name_1():
-    response = requests.post(
-        HOST + "/api/v1/transactions_category",
-        json={
-            "name": -1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_create_transaction_category_wrong_type_name_2():
-    response = requests.post(
-        HOST + "/api/v1/transactions_category",
-        json={
-            "name": 1.1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
 def test_create_transaction_category_wrong_type_description():
     response = requests.post(
         HOST + "/api/v1/transactions_category",
         json={
             "name": "1",
             "description": 1,
-            "parent_category_id": 1
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for description",
-        "status": 400
-    }
-
-
-def test_create_transaction_category_wrong_type_description_1():
-    response = requests.post(
-        HOST + "/api/v1/transactions_category",
-        json={
-            "name": "1",
-            "description": 1.2,
             "parent_category_id": 1
         },
         headers={"Content-Type": "application/json",
@@ -247,34 +187,14 @@ def test_create_transaction_category_wrong_type_parent_id():
     }
 
 
-def test_create_transaction_category_wrong_type_parent_id_2():
-    response = requests.post(
-        HOST + "/api/v1/transactions_category",
-        json={
-            "name": "1",
-            "description": 1.2,
-            "parent_category_id": 1.2
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for parent_category_id",
-        "status": 400
-    }
-
-
 '''
 TEST GETTING ALL TRANSACTION CATEGORY
 '''
 
 
-def test_get_transactions_type_success():
+def test_get_transactions_category_success():
     response = requests.get(
-        HOST + "/api/v1/transactions_types",
+        HOST + "/api/v1/transactions/categories",
         headers={"Authorization": "Bearer " + TOKEN}
     )
     assert response.status_code == 200
@@ -283,41 +203,12 @@ def test_get_transactions_type_success():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
+    assert "parent_category_id" in response.json()[0]
 
 
-def test_get_transactions_type_success_with_limit():
+def test_get_transactions_category_success_with_limit():
     response = requests.get(
-        HOST + "/api/v1/transactions_types?limit=1",
-        headers={"Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert type(response.json()) is list
-    assert len(response.json()) == 1
-    assert "id" in response.json()[0]
-    assert "name" in response.json()[0]
-    assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
-
-
-def test_get_transactions_type_success_with_offset():
-    response = requests.get(
-        HOST + "/api/v1/transactions_types?offset=0",
-        headers={"Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert type(response.json()) is list
-    assert "id" in response.json()[0]
-    assert "name" in response.json()[0]
-    assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
-
-
-def test_get_transactions_type_success_with_limit_and_offset():
-    response = requests.get(
-        HOST + "/api/v1/transactions_types?limit=1&offset=0",
+        HOST + "/api/v1/transactions/categories?limit=1",
         headers={"Authorization": "Bearer " + TOKEN}
     )
     assert response.status_code == 200
@@ -327,12 +218,41 @@ def test_get_transactions_type_success_with_limit_and_offset():
     assert "id" in response.json()[0]
     assert "name" in response.json()[0]
     assert "description" in response.json()[0]
-    assert "deleted" in response.json()[0]
+    assert "parent_category_id" in response.json()[0]
 
 
-def test_get_transactions_type_without_valid_token():
+def test_get_transactions_category_success_with_offset():
     response = requests.get(
-        HOST + "/api/v1/transactions_types",
+        HOST + "/api/v1/transactions/categories?offset=0",
+        headers={"Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert type(response.json()) is list
+    assert "id" in response.json()[0]
+    assert "name" in response.json()[0]
+    assert "description" in response.json()[0]
+    assert "parent_category_id" in response.json()[0]
+
+
+def test_get_transactions_category_success_with_limit_and_offset():
+    response = requests.get(
+        HOST + "/api/v1/transactions/categories?limit=1&offset=0",
+        headers={"Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert type(response.json()) is list
+    assert len(response.json()) == 1
+    assert "id" in response.json()[0]
+    assert "name" in response.json()[0]
+    assert "description" in response.json()[0]
+    assert "parent_category_id" in response.json()[0]
+
+
+def test_get_transactions_category_without_valid_token():
+    response = requests.get(
+        HOST + "/api/v1/transactions/categories",
         headers={"Authorization": ""}
     )
     assert response.status_code == 401
@@ -359,7 +279,6 @@ def test_update_transaction_category_success():
     assert "id" in response.json()
     assert "name" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
     assert "parent_category_id" in response.json()
 
 
@@ -427,7 +346,6 @@ def test_update_transaction_category_without_description():
     assert "id" in response.json()
     assert "name" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
     assert "parent_category_id" in response.json()
 
 
@@ -445,7 +363,6 @@ def test_update_transaction_category_without_parent_category_id():
     assert "id" in response.json()
     assert "name" in response.json()
     assert "description" in response.json()
-    assert "deleted" in response.json()
     assert "parent_category_id" in response.json()
 
 
@@ -454,46 +371,6 @@ def test_update_transaction_category_wrong_type_name():
         HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
         json={
             "name": 1,
-            "description": "description",
-            "parent_category_id": 345
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_update_transaction_category_wrong_type_name_1():
-    response = requests.put(
-        HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
-        json={
-            "name": -1,
-            "description": "description",
-            "parent_category_id": 345
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_update_transaction_category_wrong_type_name_2():
-    response = requests.put(
-        HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
-        json={
-            "name": 1.1,
             "description": "description",
             "parent_category_id": 345
         },
@@ -526,4 +403,42 @@ def test_update_transaction_category_wrong_type_description():
         "error_code": "bad-params",
         "message": "Invalid type for description",
         "status": 400
+    }
+
+
+def test_update_transaction_category_wrong_type_parent_category_id():
+    response = requests.put(
+        HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
+        json={
+            "name": "1",
+            "description": "1",
+            "parent_category_id": "345"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Invalid type for parent_category_id",
+        "status": 400
+    }
+
+
+def test_update_transaction_category_with_invalid_transaction_category_id():
+    response = requests.put(
+        HOST + "/api/v1/transactions_category/0",
+        json={
+            "name": "1",
+            "description": "1"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Transaction category 0 not found"
     }

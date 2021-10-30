@@ -7,7 +7,7 @@ class TransactionType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String(250), nullable=True)
-    deleted = db.Column(db.Integer, nullable=True)
+    deleted = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -29,7 +29,7 @@ class TransactionType(db.Model):
         return transaction_type
 
     @classmethod
-    def get_transactions_types(cls, offset=0, limit=100):
+    def get_transaction_types(cls, offset=0, limit=100):
         query = cls.query.filter()
         if limit:
             query = query.limit(limit)
