@@ -1,3 +1,4 @@
+
 from datetime import datetime
 
 from db import db
@@ -13,7 +14,7 @@ class Transaction(db.Model):
     amount = db.Column(db.Float, nullable=False)
     transaction_date = db.Column(db.DateTime, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    description = db.Column(db.String(250), nullable=False)
+    description = db.Column(db.String(250), nullable=True)
 
     def __init__(self, **kwargs):
         self.type = kwargs.get('type')

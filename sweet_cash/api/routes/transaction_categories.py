@@ -2,7 +2,7 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params
+from api.validator import jsonbody, query_params, features
 from api.models.session import Session
 from api.models.transaction_category import TransactionCategory
 from db import db
@@ -25,9 +25,9 @@ def formatting(t: TransactionCategory) -> dict:
 
 @transaction_categories_api.route('/api/v1/transactions_category', methods=['POST'])
 @jwt_required()
-@jsonbody(name=(str, "required"),
-          parent_category_id=(int, "required"),
-          description=(str, None))
+@jsonbody(name=features(type=str, required=True),
+          parent_category_id=features(type=int, required=True),
+          description=features(type=str))
 def create_transactions_category(name: str,
                                  parent_category_id: int,
                                  description='',):
@@ -51,8 +51,8 @@ def create_transactions_category(name: str,
 
 @transaction_categories_api.route('/api/v1/transactions/categories', methods=['GET'])
 @jwt_required()
-@query_params(limit=(str, None),
-              offset=(str, None))
+@query_params(limit=features(type=str),
+              offset=features(type=str))
 def get_transactions_categories(limit=100, offset=0):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
@@ -75,9 +75,9 @@ def get_transactions_categories(limit=100, offset=0):
 
 @transaction_categories_api.route('/api/v1/transactions_category/<int:transactions_category_id>', methods=['PUT'])
 @jwt_required()
-@jsonbody(name=(str, "required"),
-          parent_category_id=(int, None),
-          description=(str, None))
+@jsonbody(name=features(type=str, required=True),
+          parent_category_id=features(type=int),
+          description=features(type=str))
 def update_transactions_category(transactions_category_id: int,
                                  name: str,
                                  description='',

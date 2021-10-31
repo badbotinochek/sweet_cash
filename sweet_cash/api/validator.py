@@ -4,6 +4,11 @@ from flask import request
 import api.errors as error
 
 
+def features(type, required=False):
+    required = required if required is True else False
+    return {"type": type, "required": required}
+
+
 def clear_data(data: dict, **kwargs):
     if data is None:
         return None
@@ -19,9 +24,9 @@ def jsonbody(*args, **kwargs):
                 return error.BadParams("Json required")
             for k, v in kwargs.items():
                 parameter = request.json.get(k)
-                if parameter is None and v[1] == "required":
+                if parameter is None and v['required']:
                     return error.BadParams(f'{k} is required')
-                if parameter is not None and type(parameter) is not v[0]:
+                if parameter is not None and type(parameter) is not v['type']:
                     return error.BadParams(f'Invalid type for {k}')
             data = clear_data(request.json, **kwargs)
             data.update(other_params)
@@ -40,9 +45,9 @@ def query_params(*args, **kwargs):
         def wrapper():
             for k, v in kwargs.items():
                 parameter = request.args.get(k)
-                if parameter is None and v[1] == "required":
+                if parameter is None and v['required']:
                     return error.BadParams(f'{k} is required')
-                if parameter is not None and type(parameter) is not v[0]:
+                if parameter is not None and type(parameter) is not v['type']:
                     return error.BadParams(f'Invalid type for {k}')
             params = {a: request.args.get(a) for a in request.args}
             data = clear_data(params, **kwargs)

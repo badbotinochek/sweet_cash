@@ -3,7 +3,7 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params
+from api.validator import jsonbody, query_params, features
 from api.models.session import Session
 from api.models.transaction import Transaction
 from api.models.transaction_type import TransactionType
@@ -32,16 +32,16 @@ def formatting(t: Transaction) -> dict:
 
 @transactions_api.route('/api/v1/transaction', methods=['POST'])
 @jwt_required()
-@jsonbody(type=(int, "required"),
-          category=(int, "required"),
-          amount=(float, "required"),
-          transaction_date=(str, "required"),
-          description=(str, None))
+@jsonbody(type=features(type=int, required=True),
+          category=features(type=int, required=True),
+          amount=features(type=float, required=True),
+          transaction_date=features(type=str, required=True),
+          description=features(type=str))
 def create_transactions(type: int,
                         category: int,
                         amount: float,
                         transaction_date: str,
-                        description=''):
+                        description=None):
     """Create new user transaction
 
         Returns 401 if
@@ -84,12 +84,20 @@ def create_transactions(type: int,
         logger.warning(f'User {user_id} is trying to create transaction with invalid amount {amount}')
         raise error.APIParamError(f'Amount must be from 0 to 999 999 999 999')
 
-    t = Transaction(type=type,
-                    user_id=user_id,
-                    category=category,
-                    amount=amount,
-                    transaction_date=transaction_date,
-                    description=description)
+    if description is None:
+        t = Transaction(type=type,
+                        user_id=user_id,
+                        category=category,
+                        amount=amount,
+                        transaction_date=transaction_date)
+    else:
+        t = Transaction(type=type,
+                        user_id=user_id,
+                        category=category,
+                        amount=amount,
+                        transaction_date=transaction_date,
+                        description=description)
+
     db.session.add(t)
     db.session.commit()
 
@@ -100,8 +108,8 @@ def create_transactions(type: int,
 
 @transactions_api.route('/api/v1/transactions', methods=['GET'])
 @jwt_required()
-@query_params(limit=(str, None),
-              offset=(str, None))
+@query_params(limit=features(type=str),
+              offset=features(type=str))
 def get_transactions(limit=100, offset=0):
 
     token = request.headers["Authorization"].split('Bearer ')[1]
@@ -144,17 +152,17 @@ def get_transaction(transaction_id: int):
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['PUT'])
 @jwt_required()
-@jsonbody(type=(int, "required"),
-          category=(int, "required"),
-          amount=(float, "required"),
-          transaction_date=(str, "required"),
-          description=(str, None))
+@jsonbody(type=features(type=int, required=True),
+          category=features(type=int, required=True),
+          amount=features(type=float, required=True),
+          transaction_date=features(type=str, required=True),
+          description=features(type=str))
 def update_transaction(transaction_id: int,
                        type: int,
                        category: int,
                        amount: float,
                        transaction_date: str,
-                       description=''):
+                       description=None):
 
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -186,7 +194,8 @@ def update_transaction(transaction_id: int,
     transaction.category = category
     transaction.amount = amount
     transaction.transaction_date = transaction_date
-    transaction.description = description
+    if description is not None:
+        transaction.description = description
 
     db.session.commit()
 

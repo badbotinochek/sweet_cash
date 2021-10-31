@@ -184,6 +184,7 @@ def test_create_transaction_without_description():
     assert "amount" in response.json()
     assert "transaction_date" in response.json()
     assert "description" in response.json()
+    assert response.json()["description"] is None
 
 
 def test_create_transaction_wrong_type_type():
@@ -712,6 +713,7 @@ def test_update_transaction_without_description():
     assert "amount" in response.json()
     assert "transaction_date" in response.json()
     assert "description" in response.json()
+    assert "description" == response.json()["description"]
 
 
 def test_update_transaction_wrong_type_type():

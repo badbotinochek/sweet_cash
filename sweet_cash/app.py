@@ -7,7 +7,7 @@ from db import db
 from config import Config
 
 
-logging.basicConfig(filename="logs.log",
+logging.basicConfig(filename="../logs.log",
                     level=logging.INFO,
                     format='%(levelname)s:%(name)s:%(asctime)s: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
@@ -48,6 +48,6 @@ def create_app():
 if __name__ == '__main__':
     try:
         app = create_app()
-        app.run(debug=True)
+        app.run(debug=True, host='0.0.0.0')
     except Exception as e:
         print(e)
