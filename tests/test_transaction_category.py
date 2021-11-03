@@ -147,6 +147,25 @@ def test_create_transaction_category_with_invalid_parent_category_id():
     }
 
 
+def test_create_transaction_category_with_invalid_parent_category_id1():
+    response = requests.post(
+        HOST + "/api/v1/transactions_category",
+        json={
+            "name": "1",
+            "description": "description",
+            "parent_category_id": -1
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Parent category with id -1 not found"
+    }
+
+
 def test_create_transaction_category_wrong_type_name():
     response = requests.post(
         HOST + "/api/v1/transactions_category",
@@ -354,7 +373,7 @@ def test_update_transaction_category_without_description():
         HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
         json={
             "name": "90",
-            "parent_category_id": 345
+            "parent_category_id": 1
         },
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + TOKEN}
@@ -444,9 +463,28 @@ def test_update_transaction_category_wrong_type_parent_category_id():
     }
 
 
+def test_update_transaction_category_with_invalid_parent_category_id1():
+    response = requests.put(
+        HOST + "/api/v1/transactions_category/1",
+        json={
+            "name": "1",
+            "description": "description",
+            "parent_category_id": -1
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Parent category with id -1 not found"
+    }
+
+
 def test_update_transaction_category_with_invalid_transaction_category_id():
     response = requests.put(
-        HOST + "/api/v1/transactions_category/0",
+        HOST + "/api/v1/transactions_category/40000",
         json={
             "name": "1",
             "description": "1"
@@ -458,5 +496,5 @@ def test_update_transaction_category_with_invalid_transaction_category_id():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error": "Not found",
-        "message": "Transaction category 0 not found"
+        "message": "Transaction category 40000 not found"
     }
