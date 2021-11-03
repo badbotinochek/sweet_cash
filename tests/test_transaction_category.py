@@ -119,11 +119,30 @@ def test_create_transaction_category_without_parent_category():
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + TOKEN}
     )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert "id" in response.json()
+    assert "name" in response.json()
+    assert "parent_category_id" in response.json()
+    assert "description" in response.json()
+
+
+def test_create_transaction_category_with_invalid_parent_category_id():
+    response = requests.post(
+        HOST + "/api/v1/transactions_category",
+        json={
+            "name": "1",
+            "description": "description",
+            "parent_category_id": "1"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error_code": "bad-params",
-        "message": "parent_category_id is required",
+        "message": "Invalid type for parent_category_id",
         "status": 400
     }
 
@@ -268,8 +287,7 @@ def test_update_transaction_category_success():
         HOST + "/api/v1/transactions_category/" + TRANSACTION_CATEGORY_ID,
         json={
             "name": "1",
-            "description": "description",
-            "parent_category_id": 345
+            "description": "description"
         },
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + TOKEN}
