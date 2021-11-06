@@ -2,8 +2,8 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params, features
-from api.models.session import Session
+from api.api import jsonbody, query_params, features
+from api.models.session import SessionModel
 from api.models.transaction_type import TransactionType
 from db import db
 import api.errors as error
@@ -30,7 +30,7 @@ def create_transactions(name: str,
                         description=None):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
@@ -56,7 +56,7 @@ def create_transactions(name: str,
 def get_transactions_types(limit=100, offset=0):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to get all transaction type without valid token')
@@ -80,7 +80,7 @@ def update_transaction_type(transaction_type_id: int,
                             description=None):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to update transaction {transaction_type_id} type without valid token')

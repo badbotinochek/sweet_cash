@@ -1,7 +1,35 @@
 
 from flask import request
+import re
+from flask_jwt_extended import jwt_required
 
+from config import Config
+from api.models.session import SessionModel
 import api.errors as error
+
+
+def auth(*args, **kwargs):
+
+    def decorator(func):
+
+        @jwt_required()
+        def wrapper(**other_params):
+            # Get user_id by request token
+            token = request.headers["Authorization"].split('Bearer ')[1]
+            user_id = SessionModel.get_user_id(token=token)
+
+            if user_id is None:
+                raise error.APIAuthError('User is not authorized')
+
+            setattr(request, "user_id", user_id)
+
+            return func(*args, **other_params)
+
+        # Renaming the function name:
+        wrapper.__name__ = func.__name__
+        return wrapper
+
+    return decorator
 
 
 def features(type, required=False):
@@ -58,3 +86,21 @@ def query_params(*args, **kwargs):
         return wrapper
 
     return decorator
+
+
+def check_email_format(email: str):
+    regex = Config.EMAIL_REGEX
+    result = re.fullmatch(regex, email)
+    return result
+
+
+def check_phone_format(phone: str):
+    regex = Config.PHONE_REGEX
+    result = re.fullmatch(regex, phone)
+    return result
+
+
+def check_password_format(password: str):
+    regex = Config.PASSWORD_REGEX
+    result = re.fullmatch(regex, password)
+    return result

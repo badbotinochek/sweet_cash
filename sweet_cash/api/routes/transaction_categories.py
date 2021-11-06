@@ -2,8 +2,8 @@ from flask import request, jsonify, Blueprint
 from flask_jwt_extended import jwt_required
 import logging
 
-from api.validator import jsonbody, query_params, features
-from api.models.session import Session
+from api.api import jsonbody, query_params, features
+from api.models.session import SessionModel
 from api.models.transaction_category import TransactionCategory
 from db import db
 import api.errors as error
@@ -33,7 +33,7 @@ def create_transactions_category(name: str,
                                  description='',):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
@@ -56,7 +56,7 @@ def create_transactions_category(name: str,
 def get_transactions_categories(limit=100, offset=0):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
@@ -66,7 +66,6 @@ def get_transactions_categories(limit=100, offset=0):
                                                                              offset=int(offset))
 
     transactions_categories = [formatting(t) for t in transactions_categories]
-    print(transactions_categories)
     # TODO собрать дерево категорий
 
     logger.warning(f'User {user_id} got all transactions categories')
@@ -84,7 +83,7 @@ def update_transactions_category(transactions_category_id: int,
                                  parent_category_id=-1):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
-    user_id = Session.get_user_id(token=token)
+    user_id = SessionModel.get_user_id(token=token)
 
     if user_id is None:
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')

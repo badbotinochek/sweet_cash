@@ -7,7 +7,8 @@ blueprint = Blueprint('error_handlers', __name__)
 
 class APIError(Exception):
     """All custom API Exceptions"""
-    pass
+    code = 500
+    description = "Something's wrong"
 
 
 class APIAuthError(APIError):
@@ -28,13 +29,22 @@ class APIValueNotFound(APIError):
     description = "Not found"
 
 
+class APIConflict(APIError):
+    """Custom Request Parameters Error Class."""
+    code = 409
+    description = "Conflict"
+
+
 @blueprint.app_errorhandler(APIError)
 def handle_exception(err):
     """Return custom JSON when APIError or its children are raised"""
     response = {"error": err.description, "message": ""}
+    error_code = err.code
     if len(err.args) > 0:
         response["message"] = err.args[0]
-    return jsonify(response), err.code
+    if len(err.args) > 1:
+        error_code = err.args[1]
+    return jsonify(response), error_code
 
 
 class Error(object):

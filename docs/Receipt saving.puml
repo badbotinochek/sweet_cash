@@ -1,0 +1,89 @@
+@startuml Sweet cash receipt saving
+
+skinparam sequence {
+ArrowColor Black
+ActorBackgroundColor #deebff
+ActorBorderColor Grey
+LifeLineBorderColor Grey
+BoxBorderColor LightGrey
+BoxBackgroundColor #deebff
+ParticipantBorderColor Grey
+ParticipantBackgroundColor LightGrey
+AltBorderColor LightGrey
+}
+
+skinparam ParticipantPadding 10
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "Mobile app" as app
+box "Sweet Cash"
+participant "Backend" as back
+database "DB" as db
+end box
+participant "NalogRu API" as nalog
+
+
+==Receipt saving v.1==
+activate user
+
+user -> app: Сканирует QR чека
+activate app
+app -> app: Расшифровывает QR
+app -> app: Проверяет, что расшифрованный код относится к чеку
+
+alt #transparent QR не от чека
+    app -x user: Отображает сообщение о невалидном QR
+else QR от чека
+    app -> back: Отправляет код чека
+    activate back
+    back -> nalog: Запрашивает id чека по коду\nPOST /v2/ticket
+    activate nalog
+    nalog -> back: Возвращает результат
+    deactivate nalog
+
+    alt #transparent Пользователь не авторизован в NalogRu
+        back -> nalog: Обновления данных авторизации пользователя
+        activate nalog
+        nalog -> back: Возвращает результат
+        deactivate nalog
+
+        alt #transparent Получена ошибка
+            back -> app: Возвращает ответ
+            app -x user: Отображает сообщение о невозможности авторизоваться в системе ФНС
+        else Получены новые данные для авторизации
+            back -> db: Обновляет данные об авторизации от NalogRu API
+            back -> nalog: Запрашивает id чека по коду\nPOST /v2/ticket
+            activate nalog
+            nalog -> back: Возвращает результат
+            deactivate nalog
+        end
+
+    else Id чека не получено
+        back -> app: Возвращает ответ
+        app -x user: Отображает сообщение об отсутствии чека в системе ФНС
+    else Id чека получено
+        back -> db: Проверка наличия чека
+
+        alt #transparent Чек найден
+
+            back -> app: Возвращает ответ
+            app -x user: Отображает сообщение о том, что чек уже сохранен
+
+        else Чек не найден
+            back -> nalog: Запрашивает данные чека\nPOST /v2/tickets/{ticket_id}
+            activate nalog
+            nalog -> back: Возвращает результат
+            deactivate nalog
+            back -> db: Сохраняет чек
+            back -> db: Сохраняет транзакцию
+            back -> db: Обновляет id транзакции у чека
+            back -> app: Возвращает ответ
+            deactivate back
+            app -x user: Отображает сообщение об успешном сохранении чека
+        end
+    end
+end
+
+
+@enduml

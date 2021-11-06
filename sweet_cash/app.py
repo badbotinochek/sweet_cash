@@ -24,6 +24,8 @@ def create_app():
     from api.routes.transactions import transactions_api
     from api.routes.transaction_categories import transaction_categories_api
     from api.routes.transaction_types import transaction_types_api
+    from api.routes.external_auth import external_auth_api
+    from api.routes.receipts import receipts_api
 
     # db
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
@@ -40,6 +42,8 @@ def create_app():
     app.register_blueprint(transactions_api)
     app.register_blueprint(transaction_categories_api)
     app.register_blueprint(transaction_types_api)
+    app.register_blueprint(external_auth_api)
+    app.register_blueprint(receipts_api)
     app.register_blueprint(error.blueprint)
 
     return app
@@ -48,6 +52,6 @@ def create_app():
 if __name__ == '__main__':
     try:
         app = create_app()
-        app.run(debug=True, host='0.0.0.0')
+        app.run(debug=True)  # , host='0.0.0.0')
     except Exception as e:
         print(e)
