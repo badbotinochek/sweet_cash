@@ -26,10 +26,10 @@ def formatting(t: TransactionCategory) -> dict:
 @transaction_categories_api.route('/api/v1/transactions_category', methods=['POST'])
 @jwt_required()
 @jsonbody(name=features(type=str, required=True),
-          parent_category_id=features(type=int, required=True),
+          parent_category_id=features(type=int),
           description=features(type=str))
 def create_transactions_category(name: str,
-                                 parent_category_id: int,
+                                 parent_category_id=0,
                                  description='',):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
@@ -39,9 +39,17 @@ def create_transactions_category(name: str,
         logger.warning(f'User {user_id} is trying to create transaction type without valid token')
         raise error.APIAuthError('User is not authorized')
 
+    if parent_category_id != 0:
+        transactions_category = TransactionCategory.get(category_id=parent_category_id)
+        if transactions_category is None:
+            logger.warning(f'User {user_id} is trying to create transaction category with a '
+                           f'non-existent parent category id {parent_category_id}')
+            raise error.APIValueNotFound(f'Parent category with id {parent_category_id} not found')
+
     t = TransactionCategory(name=name,
                             description=description,
                             parent_category_id=parent_category_id)
+
     db.session.add(t)
     db.session.commit()
 
@@ -66,7 +74,6 @@ def get_transactions_categories(limit=100, offset=0):
                                                                              offset=int(offset))
 
     transactions_categories = [formatting(t) for t in transactions_categories]
-    print(transactions_categories)
     # TODO собрать дерево категорий
 
     logger.warning(f'User {user_id} got all transactions categories')
@@ -81,7 +88,7 @@ def get_transactions_categories(limit=100, offset=0):
 def update_transactions_category(transactions_category_id: int,
                                  name: str,
                                  description='',
-                                 parent_category_id=-1):
+                                 parent_category_id=None):
     # Get user_id by request token
     token = request.headers["Authorization"].split('Bearer ')[1]
     user_id = Session.get_user_id(token=token)
@@ -96,11 +103,18 @@ def update_transactions_category(transactions_category_id: int,
                        f'non-existent transaction category {transactions_category_id}')
         raise error.APIValueNotFound(f'Transaction category {transactions_category_id} not found')
 
+    if parent_category_id is not None:
+        if parent_category_id != 0:
+            transactions_category = TransactionCategory.get(category_id=parent_category_id)
+            if transactions_category is None:
+                logger.warning(f'User {user_id} is trying to create transaction category with a '
+                               f'non-existent parent category id {parent_category_id}')
+                raise error.APIValueNotFound(f'Parent category with id {parent_category_id} not found')
+
+        transactions_category.parent_category_id = parent_category_id
+
     if description != '':
         transactions_category.description = description
-
-    if parent_category_id != -1:
-        transactions_category.parent_category_id = parent_category_id
 
     transactions_category.name = name
     db.session.commit()
