@@ -1,0 +1,65 @@
+@startuml Sweet cash login with app
+
+skinparam sequence {
+ArrowColor Black
+ActorBackgroundColor #deebff
+ActorBorderColor Grey
+LifeLineBorderColor Grey
+BoxBorderColor LightGrey
+BoxBackgroundColor #deebff
+ParticipantBorderColor Grey
+ParticipantBackgroundColor LightGrey
+AltBorderColor LightGrey
+}
+
+skinparam ParticipantPadding 10
+skinparam BoxPadding 10
+
+actor "User" as user
+participant "Mobile app" as app
+box "Sweet Cash"
+participant "Backend" as back
+database "DB" as db
+end box
+participant "NalogRu API" as nalog
+
+
+==Login with app==
+activate user
+
+user -> app: Авторизуется в приложении
+activate app
+app -> back: Запрашивает авторизацию для пользователя\nPOST /api/v1/login
+activate back
+back -> db: Ищет пользователя
+
+alt #transparent Пользователь не авторизован
+    back -> app: Возвращает ответ
+    app -x user: Отображает сообщение о неуспешной авторизации
+else Пользователь авторизован
+    back -> db: Ищет данные авторизации от NalogRu API
+
+    alt #transparent Данных об авторизации от NalogRu API нет
+        back -> nalog: Отправляет запрос на отправку SMS на номер пользователя
+        activate nalog
+        nalog -> nalog: Отправляет SMS
+        back -> app: Возвращает ответ
+        deactivate nalog
+        app -> user: Отображает форму требование ввести код из СМС
+        user -> app: Вводит код из SMS
+        app -> back: Отправлет код из SMS
+        back -> nalog: Авторизуется в NalogRu API
+        activate nalog
+        nalog -> back: Возвращает данные авторизации
+        deactivate nalog
+        back -> back: Сохраняет данные об авторизации от NalogRu API
+        back -> app: Возвращает ответ
+        app -x user: Отображает экран с фунциями приложения
+
+    else Данные об авторизации от NalogRu API есть
+        app -x user: Отображает экран с фунциями приложения
+    end
+end
+
+
+@enduml

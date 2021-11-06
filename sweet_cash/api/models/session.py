@@ -6,15 +6,15 @@ from datetime import timedelta
 from db import db
 
 
-class Session(db.Model):
+class SessionModel(db.Model):
     __tablename__ = 'sessions'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
     token = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     login_method = db.Column(db.String, nullable=True)
-    start = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    updated = db.Column(db.DateTime, nullable=True)
+    start = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         self.token = self.new_token()
@@ -32,6 +32,16 @@ class Session(db.Model):
         token = create_access_token(
             identity=self.id, expires_delta=expire_delta)
         return token
+
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, login_method: str):
+        self.token = self.new_token()
+        self.login_method = login_method
+        self.updated_at = datetime.utcnow().isoformat()
+        db.session.commit()
 
     @classmethod
     def get_user_id(cls, token: str):
