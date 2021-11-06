@@ -74,7 +74,6 @@ def get_transactions_categories(limit=100, offset=0):
                                                                              offset=int(offset))
 
     transactions_categories = [formatting(t) for t in transactions_categories]
-    print(type(transactions_categories))
     # TODO собрать дерево категорий
 
     logger.warning(f'User {user_id} got all transactions categories')
