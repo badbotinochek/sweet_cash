@@ -28,6 +28,16 @@ class NalogRuSessionModel(db.Model):
     def get_refresh_token(self):
         return self.refresh_token
 
+    def create(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self, **kwargs):
+        self.session_id = kwargs.get('session_id')
+        self.refresh_token = kwargs.get('refresh_token')
+        self.updated_at = datetime.utcnow().isoformat()
+        db.session.commit()
+
     @classmethod
     def get_by_user(cls, user_id: int):
         session = cls.query.filter(cls.user_id == user_id).first()

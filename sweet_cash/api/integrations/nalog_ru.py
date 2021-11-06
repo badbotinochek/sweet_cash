@@ -1,4 +1,3 @@
-from datetime import datetime
 import requests
 import logging
 
@@ -19,14 +18,13 @@ def create_or_update_session(user_id: str, session_id: str, refresh_token: str):
         external_session = NalogRuSessionModel(user_id=user_id,
                                                session_id=session_id,
                                                refresh_token=refresh_token)
-        db.session.add(external_session)
+        external_session.create()
 
         logger.info(f'Created new NalogRuSession for user {user_id}')
 
     else:
-        external_session.session_id = session_id
-        external_session.refresh_token = refresh_token
-        external_session.updated_at = datetime.utcnow().isoformat()
+        external_session.update(session_id=session_id,
+                                refresh_token=refresh_token)
 
         logger.info(f'Updated NalogRuSession for user {user_id}')
 
