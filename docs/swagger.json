@@ -1,0 +1,751 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Swagger Sweet cash"
+  },
+  "basePath": "/api/",
+  "tags": [
+    {
+      "name": "Registration",
+      "description": "Сервис регистрации пользователя"
+    },
+    {
+      "name": "Transactions",
+      "description": "Сервис операций"
+    },
+    {
+      "name": "References",
+      "description": "Справочники"
+    }
+  ],
+  "paths": {
+    "/api/v1/login": {
+      "post": {
+        "tags": [
+          "Registration"
+        ],
+        "summary": "",
+        "description": "Создает нового пользователя в системе",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Created user object",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Пользователь создан"
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        }
+      }
+    },
+    "/api/v1/transaction": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Добавляет новую операцию",
+        "description": "",
+        "operationId": "addTransaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Transactions"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Новая операция создана",
+            "schema": {
+              "$ref": "#/definitions/TransactionsDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Отсутствует доступ к выполнению метода"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Отдает список операций",
+        "description": "Отдает список операций",
+        "operationId": "getTransactions",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TransactionsDetail"
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transaction/{transaction_id}": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Отдает одну транзакцию по id",
+        "description": "Отдает одну транзакцию по id",
+        "operationId": "getTransactionById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "pattern": "\\d+",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TransactionsDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Обновляет операцию",
+        "description": "",
+        "operationId": "updatePetWithForm",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "pattern": "\\d+",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TransactionsDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Удаляет операцию",
+        "description": "",
+        "operationId": "deletePet",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transaction_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "pattern": "\\d+",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TransactionsDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transaction_type": {
+      "post": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Добавляет новый тип операции",
+        "description": "",
+        "operationId": "addTypeTransaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TypeTransaction"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Новая операция создана",
+            "schema": {
+              "$ref": "#/definitions/TransactionTypeDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Отсутствует доступ к выполнению метода"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions_types": {
+      "get": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Отдает все типы операций",
+        "description": "Отдает список операций",
+        "operationId": "getTransactionTypes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TransactionTypeDetail"
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transaction_type/{transaction_type_id}": {
+      "put": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Обновляет тип операции",
+        "description": "",
+        "operationId": "updateTransactionType",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transaction_type_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "pattern": "\\d+",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TransactionTypeDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions_category": {
+      "post": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Добавляет новую категории операции",
+        "description": "",
+        "operationId": "addCategotyTransaction",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CategoryTransaction"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Новая операция создана",
+            "schema": {
+              "$ref": "#/definitions/TransactionCategoryDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "403": {
+            "description": "Отсутствует доступ к выполнению метода"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions/categories": {
+      "get": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Отдает все категории операции",
+        "description": "",
+        "operationId": "getTransactionCategories",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TransactionCategoryDetail"
+              }
+            }
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/v1/transactions_category/{transactions_category_id}": {
+      "put": {
+        "tags": [
+          "References"
+        ],
+        "summary": "Обновляет категорию операции",
+        "description": "",
+        "operationId": "updateTransactionCategories",
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "transactions_category_id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "pattern": "\\d+",
+            "format": "int64"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TransactionCategoryDetail"
+            }
+          },
+          "400": {
+            "description": "Неверно сформированный запрос"
+          },
+          "401": {
+            "description": "Пользователь не авторизован"
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Authorization": {
+      "description": "",
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "Transactions": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id типа операции"
+        },
+        "category": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id категории операции"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 100.22,
+          "description": "Количество средств"
+        },
+        "transaction_date": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2021-05-27T12:24:34",
+          "description": "Дата и время операции"
+        },
+        "description": {
+          "type": "string",
+          "example": "Купил молочка в пятерочке",
+          "description": "Описание операции"
+        }
+      }
+    },
+    "TransactionsDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id операции"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id типа операции"
+        },
+        "category": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id категории операции"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double",
+          "example": 100.22,
+          "description": "Количество средств"
+        },
+        "transaction_date": {
+          "type": "string",
+          "format": "date-time",
+          "example": "2021-05-27T12:24:34",
+          "description": "Дата и время операции"
+        },
+        "description": {
+          "type": "string",
+          "example": "Купил молочка в пятерочке",
+          "description": "Описание операции"
+        }
+      }
+    },
+    "TypeTransaction": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "format": "STRING",
+          "example": "Расход",
+          "description": "Наименование типа"
+        },
+        "description": {
+          "type": "string",
+          "example": "Создал для себя",
+          "description": "Описание типа"
+        }
+      }
+    },
+    "TransactionTypeDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Id операции"
+        },
+        "name": {
+          "type": "string",
+          "format": "STRING",
+          "example": "Расход",
+          "description": "Наименование типа"
+        },
+        "description": {
+          "type": "string",
+          "example": "Создал для себя",
+          "description": "Описание типа"
+        }
+      }
+    },
+    "CategoryTransaction": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "format": "STRING",
+          "example": "Расход",
+          "description": "Наименование типа"
+        },
+        "parent_category_id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Номер корневой категории"
+        },
+        "description": {
+          "type": "string",
+          "example": "Создал для себя",
+          "description": "Описание типа"
+        }
+      }
+    },
+    "TransactionCategoryDetail": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Номер категории"
+        },
+        "parent_category_id": {
+          "type": "integer",
+          "format": "int64",
+          "example": 1,
+          "description": "Номер корневой категории"
+        },
+        "name": {
+          "type": "string",
+          "format": "STRING",
+          "example": "Продукты",
+          "description": "Наименование категории"
+        },
+        "description": {
+          "type": "string",
+          "example": "Создал для себя",
+          "description": "Описание категории"
+        }
+      }
+    }
+  }
+}

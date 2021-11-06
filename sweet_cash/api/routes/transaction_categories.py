@@ -46,7 +46,6 @@ def create_transactions_category(name: str,
                            f'non-existent parent category id {parent_category_id}')
             raise error.APIValueNotFound(f'Parent category with id {parent_category_id} not found')
 
-
     t = TransactionCategory(name=name,
                             description=description,
                             parent_category_id=parent_category_id)
@@ -75,7 +74,7 @@ def get_transactions_categories(limit=100, offset=0):
                                                                              offset=int(offset))
 
     transactions_categories = [formatting(t) for t in transactions_categories]
-    print(transactions_categories)
+    print(type(transactions_categories))
     # TODO собрать дерево категорий
 
     logger.warning(f'User {user_id} got all transactions categories')
