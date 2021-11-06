@@ -33,7 +33,7 @@ class TransactionCategory(db.Model):
 
     @classmethod
     def get_transaction_categories(cls, offset=0, limit=100):
-        query = cls.query.filter()
+        query = cls.query.filter(cls.deleted == None)
         if limit:
             query = query.limit(limit)
         if offset:
