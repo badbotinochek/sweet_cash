@@ -4,9 +4,10 @@ from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
 from db import db
+from api.models.base import BaseModel
 
 
-class SessionModel(db.Model):
+class SessionModel(BaseModel):
     __tablename__ = 'sessions'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
@@ -21,21 +22,11 @@ class SessionModel(db.Model):
         self.user_id = kwargs.get('user_id')
         self.login_method = kwargs.get('login_method')
 
-    def get_id(self):
-        return self.id
-
-    def get_token(self):
-        return self.token
-
     def new_token(self, expire_time=24):
         expire_delta = timedelta(expire_time)
         token = create_access_token(
             identity=self.id, expires_delta=expire_delta)
         return token
-
-    def create(self):
-        db.session.add(self)
-        db.session.commit()
 
     def update(self, login_method: str):
         self.token = self.new_token()

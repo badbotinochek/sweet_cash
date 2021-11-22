@@ -27,6 +27,7 @@ def convert_to_utc(ts: int):
 
 
 class Receipt:
+
     def __init__(self, **kwargs):
         self.user_id = kwargs.get("user_id")
         self.qr = kwargs.get("qr")
@@ -50,7 +51,7 @@ class Receipt:
         transaction = self.save_transaction_by_receipt()
 
         if transaction is not None:
-            receipt.transaction_id = transaction["id"]
+            receipt.transaction_id = transaction.id
 
         receipt.create()
 
@@ -66,11 +67,11 @@ class Receipt:
 
         amount = self.receipt_data["operation"]["sum"] / 100
         transaction_date = convert_to_utc(self.receipt_data["ticket"]["document"]["receipt"]["dateTime"])
-        type_id = 1  # TODO Подставлять тип дохода
+        type = "Income"  # TODO Подставлять тип дохода
         category_id = 1  # TODO Искать категорию по наименованию
 
         transaction = Transaction(user_id=self.user_id,
-                                  type_id=type_id,
+                                  type=type,
                                   category_id=category_id,
                                   amount=amount,
                                   transaction_date=transaction_date).create()

@@ -2,7 +2,7 @@ from flask import jsonify, Blueprint
 import logging
 
 from api.api import jsonbody, features
-from api.services.auth import User
+from api.services.user import User
 
 logger = logging.getLogger(name="auth")
 
@@ -29,4 +29,6 @@ def register(name: str,
 @jsonbody(email=features(type=str, required=True),
           password=features(type=str, required=True))
 def login(email: str, password: str):
-    return jsonify(User(email=email, password=password).login(login_method='email')), 200
+    return jsonify(User(email=email,
+                        password=password,
+                        login_method='email').login()), 200

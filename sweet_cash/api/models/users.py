@@ -1,15 +1,14 @@
 
 import bcrypt
-from datetime import datetime
 
 from db import db
+from api.models.base import BaseModel
 
 
-class UserModel(db.Model):
+class UserModel(BaseModel):
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     name = db.Column(db.String(250), nullable=False)
     email = db.Column(db.String(250), nullable=False, unique=True)
     phone = db.Column(db.String, nullable=False)
@@ -23,16 +22,6 @@ class UserModel(db.Model):
 
     def __repr__(self):
         return "<User(name='{}', email='{}', password={}".format(self.name, self.email, self.password)
-
-    def get_id(self):
-        return self.id
-
-    def get_phone(self):
-        return self.phone
-
-    def create(self):
-        db.session.add(self)
-        db.session.commit()
 
     @classmethod
     def get(cls, user_id: str) -> db.Model:

@@ -1,13 +1,13 @@
 from datetime import datetime
 
 from db import db
+from api.models.base import BaseModel
 
 
-class ReceiptModel(db.Model):
+class ReceiptModel(BaseModel):
     __tablename__ = 'receipts'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     user_id = db.Column(db.Integer, index=True, nullable=False)
     external_id = db.Column(db.String, index=True, nullable=False)
     transaction_id = db.Column(db.Integer, nullable=True)
@@ -17,13 +17,6 @@ class ReceiptModel(db.Model):
         self.user_id = kwargs.get('user_id')
         self.external_id = kwargs.get('external_id')
         self.data = kwargs.get('data')
-
-    def get_id(self):
-        return self.id
-
-    def create(self):
-        db.session.add(self)
-        db.session.commit()
 
     @classmethod
     def get_by_user(cls, receipt_id: int, user_id: int):

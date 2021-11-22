@@ -28,7 +28,7 @@ def test_create_transaction_success():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -55,7 +55,7 @@ def test_create_transaction_without_valid_token():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -108,7 +108,7 @@ def test_create_transaction_without_category():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
             "private": False,
@@ -130,7 +130,7 @@ def test_create_transaction_without_amount():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "transaction_date": "2021-10-10T04:25:03Z",
             "private": False,
@@ -152,7 +152,7 @@ def test_create_transaction_without_transaction_date():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "private": False,
@@ -174,7 +174,7 @@ def test_create_transaction_without_private():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -196,7 +196,7 @@ def test_create_transaction_without_description():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -222,7 +222,7 @@ def test_create_transaction_wrong_type_type():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": "1",
+            "type": 1,
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -245,7 +245,7 @@ def test_create_transaction_wrong_category_type():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": "1",
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -268,7 +268,7 @@ def test_create_transaction_wrong_amount_type_1():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": "1.01",
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -291,7 +291,7 @@ def test_create_transaction_wrong_amount_type_2():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -314,7 +314,7 @@ def test_create_transaction_wrong_transaction_date_type():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": 0,
@@ -337,7 +337,7 @@ def test_create_transaction_wrong_private_type():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -360,7 +360,7 @@ def test_create_transaction_wrong_description_type():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -383,7 +383,7 @@ def test_create_transaction_with_invalid_type_id():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 0,
+            "type": "Incoming",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -397,7 +397,7 @@ def test_create_transaction_with_invalid_type_id():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error": "Not found",
-        "message": "Transaction type with id 0 not found"
+        "message": "Invalid transaction type Incoming"
     }
 
 
@@ -405,7 +405,7 @@ def test_create_transaction_with_invalid_category_id():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 0,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -427,7 +427,7 @@ def test_create_transaction_with_invalid_amount_1():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": -1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -449,7 +449,7 @@ def test_create_transaction_with_invalid_amount_2():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1000000000000000.0,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -606,7 +606,7 @@ def test_update_transaction_success():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -632,7 +632,7 @@ def test_update_transaction_without_valid_token():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -663,7 +663,7 @@ def test_update_transaction_with_invalid_transaction_id():
     response = requests.put(
         HOST + "/api/v1/transaction/0",
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -707,7 +707,7 @@ def test_update_transaction_without_category():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
             "private": False,
@@ -729,7 +729,7 @@ def test_update_transaction_without_amount():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "transaction_date": "2021-10-10T04:25:03Z",
             "private": False,
@@ -751,7 +751,7 @@ def test_update_transaction_without_transaction_date():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "private": False,
@@ -773,7 +773,7 @@ def test_update_transaction_without_private():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -795,7 +795,7 @@ def test_update_transaction_without_description():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -821,7 +821,7 @@ def test_update_transaction_wrong_type_type():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": "1",
+            "type": 1,
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -844,7 +844,7 @@ def test_update_transaction_wrong_category_type():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": "1",
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -867,7 +867,7 @@ def test_update_transaction_wrong_amount_type_1():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": "1.01",
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -890,7 +890,7 @@ def test_update_transaction_wrong_amount_type_2():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -913,7 +913,7 @@ def test_update_transaction_wrong_transaction_date_type():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": 0,
@@ -936,7 +936,7 @@ def test_update_transaction_wrong_private_type():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -959,7 +959,7 @@ def test_update_transaction_wrong_description_type():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -982,7 +982,7 @@ def test_update_transaction_with_invalid_type_id():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 0,
+            "type": "Incoming",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -996,7 +996,7 @@ def test_update_transaction_with_invalid_type_id():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error": "Not found",
-        "message": "Transaction type with id 0 not found"
+        "message": "Invalid transaction type Incoming"
     }
 
 
@@ -1004,7 +1004,7 @@ def test_update_transaction_with_invalid_category_id():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 0,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -1026,7 +1026,7 @@ def test_update_transaction_with_invalid_amount_1():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": -1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -1048,7 +1048,7 @@ def test_update_transaction_with_invalid_amount_2():
     response = requests.put(
         HOST + "/api/v1/transaction/" + TRANSACTION_ID,
         json={
-            "type": 1,
+            "type": "Income",
             "category": 1,
             "amount": 1000000000000000.0,
             "transaction_date": "2021-10-10T04:25:03Z",
@@ -1078,7 +1078,7 @@ def test_delete_transaction_success():
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == 'Ok'
+    assert response.json() == '1 transactions deleted'
 
 
 def test_delete_transaction_without_valid_token():
@@ -1094,9 +1094,6 @@ def test_delete_transaction_with_invalid_transaction_id():
         HOST + "/api/v1/transaction/0",
         headers={"Authorization": "Bearer " + TOKEN}
     )
-    assert response.status_code == 404
+    assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error": "Not found",
-        "message": "Transaction 0 not found"
-    }
+    assert response.json() == '0 transactions deleted'
