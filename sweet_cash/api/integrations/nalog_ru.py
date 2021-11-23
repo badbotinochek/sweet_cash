@@ -34,6 +34,16 @@ class NalogRuApi(metaclass=Singleton):
     DEVICE_ID = Config.NALOG_RU_DEVICE_ID
     SUCCESS_CODE = [200, 204]
 
+    def check_response(self, response, *args):
+        if response.status_code in self.SUCCESS_CODE:
+            logger.error(f'NalogRu API error. Response {response}')
+            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+
+        for arg in args:
+            if arg not in response.json():
+                logger.error(f'NalogRu API error. {arg} not in response. Response {response}')
+                raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+
     def send_otp_sms(self, user_id: str):
         """
         Send SMS with otp
@@ -60,9 +70,7 @@ class NalogRuApi(metaclass=Singleton):
 
         logger.info(f'User {user_id} is trying to send otp SMS')
 
-        if response.status_code in self.SUCCESS_CODE:
-            logger.error(f'Error sending sms. Response from NalogRu {response}')
-            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+        self.check_response(response)
 
     def verify_otp(self, user_id: str, otp: str):
         """
@@ -89,10 +97,7 @@ class NalogRuApi(metaclass=Singleton):
 
         response = requests.post(url, json=payload)
 
-        if response.status_code in self.SUCCESS_CODE or \
-                'sessionId' not in response.json() or "refresh_token" not in response.json():
-            logger.error(f'Error verification otp {otp} for phone {phone}. Response from NalogRu {response}')
-            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+        self.check_response(response, "sessionId", "refresh_token")
 
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
@@ -124,10 +129,7 @@ class NalogRuApi(metaclass=Singleton):
 
         response = requests.post(url, json=payload, headers=headers)
 
-        if response.status_code in self.SUCCESS_CODE or \
-                'sessionId' not in response.json() or "refresh_token" not in response.json():
-            logger.error(f'Error refresh token. Response from NalogRu {response}')
-            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+        self.check_response(response, "sessionId", "refresh_token")
 
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
@@ -166,9 +168,7 @@ class NalogRuApi(metaclass=Singleton):
 
             response = requests.post(url, json=payload, headers=headers)
 
-        if response.status_code in self.SUCCESS_CODE or 'id' not in response.json():
-            logger.error(f'Error getting ticket id. Response from NalogRu {response}')
-            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+        self.check_response(response, "id")
 
         ticket_id = response.json()["id"]
 
@@ -202,9 +202,7 @@ class NalogRuApi(metaclass=Singleton):
 
         response = requests.get(url, headers=headers)
 
-        if response.status_code in self.SUCCESS_CODE:
-            logger.error(f'Error getting ticket. Response from NalogRu {response}')
-            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+        self.check_response(response, "id")
 
         logger.info(f'Got ticket {ticket_id} for user {user_id}')
 

@@ -1,9 +1,8 @@
-
-from flask import request, jsonify, Blueprint
+from flask import request, Blueprint
 import logging
 
 from api.services.receipts import Receipt
-from api.api import auth,  jsonbody, query_params, features
+from api.api import Response, auth, jsonbody, query_params, features
 
 logger = logging.getLogger(name="receipts")
 
@@ -14,5 +13,6 @@ receipts_api = Blueprint('receipts', __name__)
 @auth()
 @jsonbody(qr=features(type=str, required=True))
 def save_receipt(qr: str):
-    return jsonify(Receipt(user_id=getattr(request, "user_id"),
-                           qr=qr).create()), 200
+    result = Receipt(user_id=getattr(request, "user_id"),
+                     qr=qr).create()
+    return Response.success(result)

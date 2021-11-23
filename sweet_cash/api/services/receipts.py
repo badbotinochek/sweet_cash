@@ -67,7 +67,7 @@ class Receipt:
 
         amount = self.receipt_data["operation"]["sum"] / 100
         transaction_date = convert_to_utc(self.receipt_data["ticket"]["document"]["receipt"]["dateTime"])
-        type = "Income"  # TODO Подставлять тип дохода
+        type = "Income"
         category_id = 1  # TODO Искать категорию по наименованию
 
         transaction = Transaction(user_id=self.user_id,

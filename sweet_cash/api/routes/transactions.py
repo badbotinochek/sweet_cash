@@ -1,7 +1,7 @@
-from flask import request, jsonify, Blueprint
+from flask import request, Blueprint
 import logging
 
-from api.api import auth, jsonbody, query_params, features
+from api.api import Response, auth, jsonbody, query_params, features
 from api.services.transactions import Transaction, formatting
 
 logger = logging.getLogger(name="transactions")
@@ -50,7 +50,7 @@ def create_transaction(type: str,
                                     transaction_date=transaction_date,
                                     private=private,
                                     description=description).create_or_update())
-    return jsonify(result), 200
+    return Response.success(result)
 
 
 @transactions_api.route('/api/v1/transactions', methods=['GET'])
@@ -61,7 +61,7 @@ def get_transactions(limit=100, offset=0):
     result = Transaction(user_id=getattr(request, "user_id")).get_batch(limit=limit,
                                                                         offset=offset)
     result = [formatting(item) for item in result]
-    return jsonify(result), 200
+    return Response.success(result)
 
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['GET'])
@@ -69,7 +69,7 @@ def get_transactions(limit=100, offset=0):
 def get_transaction(transaction_id: int):
     result = formatting(Transaction(user_id=getattr(request, "user_id"),
                                     transaction_id=transaction_id).get())
-    return jsonify(result), 200
+    return Response.success(result)
 
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['PUT'])
@@ -95,7 +95,7 @@ def update_transaction(transaction_id: int,
                                     transaction_date=transaction_date,
                                     private=private,
                                     description=description).create_or_update())
-    return jsonify(result), 200
+    return Response.success(result)
 
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['DELETE'])
@@ -103,4 +103,4 @@ def update_transaction(transaction_id: int,
 def delete_transaction(transaction_id: int):
     result = Transaction(user_id=getattr(request, "user_id"),
                          transaction_id=transaction_id).delete()
-    return jsonify(f'{result} transactions deleted'), 200
+    return Response.success(f'{result} transactions deleted')

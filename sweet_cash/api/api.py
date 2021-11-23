@@ -1,11 +1,18 @@
 
-from flask import request
+from flask import request, jsonify
 import re
 from flask_jwt_extended import jwt_required
 
 from config import Config
 from api.models.session import SessionModel
 import api.errors as error
+
+
+class Response(object):
+
+    @staticmethod
+    def success(data="Ok", code=200):
+        return jsonify(data), code
 
 
 def auth(*args, **kwargs):
