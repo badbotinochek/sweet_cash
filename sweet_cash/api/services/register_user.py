@@ -9,40 +9,30 @@ logger = logging.getLogger(name="auth")
 
 class RegisterUser:
 
-    def __init__(self, **kwargs):
-        self.user_id = kwargs.get("user_id")
-        self.name = kwargs.get("name")
-        self.email = kwargs.get("email")
-        self.phone = kwargs.get("phone")
-        self.password = kwargs.get("password")
-
-    def __call__(self):
-        if not check_email_format(self.email):
+    def __call__(self, email, name, phone, password):
+        if not check_email_format(email):
             raise error.APIParamError('Invalid email format')
 
-        if not check_phone_format(self.phone):
+        if not check_phone_format(phone):
             raise error.APIParamError('Invalid phone format')
 
-        if not check_password_format(self.password):
+        if not check_password_format(password):
             raise error.APIParamError('Invalid password format')
 
-        user = UserModel.get_user(self.email)
+        user = UserModel.get_user(email)
 
         if user is not None:
-            logger.info(f'User tried to register with an already registered email {self.email}')
+            logger.info(f'User tried to register with an already registered email {email}')
             raise error.APIConflict('Email already registered')
 
-        self._create_new_user()
+        user = UserModel(name=name,
+                         email=email,
+                         phone=phone,
+                         password=password)
+        user.create()
 
-        logger.info(f'User {self.user_id} registered with email {self.email}')
+        logger.info(f'Created new user {user.id}')
+
+        logger.info(f'User {user.id} registered with email {email}')
 
         return "Ok"
-
-    def _create_new_user(self):
-        user = UserModel(name=self.name,
-                         email=self.email,
-                         phone=self.phone,
-                         password=self.password)
-        user.create()
-        self.user_id = user.id
-        logger.info(f'Created new user {self.user_id}')

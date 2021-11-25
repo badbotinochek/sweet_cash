@@ -3,7 +3,7 @@ from flask import request, Blueprint
 import logging
 
 from api.integrations.nalog_ru import NalogRuApi
-from api.api import SuccessResponse, auth, jsonbody, query_params, features
+from api.api import SuccessResponse, auth, jsonbody, features
 
 logger = logging.getLogger(name="external_auth")
 

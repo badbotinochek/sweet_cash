@@ -2,12 +2,10 @@ from flask import request, Blueprint
 import logging
 
 from api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
-from api.dependencies import (
-    create_or_update_transaction_,
-    get_transaction_,
-    get_transactions_,
-    delete_transaction_
-)
+from api.services.create_or_update_transaction import CreateOrUpdateTransaction
+from api.services.get_transaction import GetTransaction
+from api.services.get_transactions import GetTransactions
+from api.services.delete_transaction import DeleteTransaction
 
 logger = logging.getLogger(name="transactions")
 
@@ -27,7 +25,8 @@ def create_transaction(type: str,
                        amount: float,
                        transaction_date: str,
                        private: bool,
-                       description=None):
+                       description=None,
+                       create_or_update_transaction=CreateOrUpdateTransaction()):
     """
     Create new user transaction
 
@@ -48,13 +47,13 @@ def create_transaction(type: str,
         {
         }
     """
-    result = formatting(create_or_update_transaction_(user_id=getattr(request, "user_id"),
-                                                      type=type,
-                                                      category_id=category,
-                                                      amount=amount,
-                                                      transaction_date=transaction_date,
-                                                      private=private,
-                                                      description=description)())
+    result = formatting(create_or_update_transaction(user_id=getattr(request, "user_id"),
+                                                     type=type,
+                                                     category_id=category,
+                                                     amount=amount,
+                                                     transaction_date=transaction_date,
+                                                     private=private,
+                                                     description=description))
     return SuccessResponse(result)
 
 
@@ -62,19 +61,19 @@ def create_transaction(type: str,
 @auth()
 @query_params(limit=features(type=str),
               offset=features(type=str))
-def get_transactions(limit=100, offset=0):
-    result = get_transactions_(user_id=getattr(request, "user_id"))(limit=limit,
-                                                                    offset=offset)
-    result = [formatting(item) for item in result]
-    r = SuccessResponse(result)
+def get_transactions(limit=100, offset=0, get_transactions=GetTransactions()):
+    transactions = get_transactions(user_id=getattr(request, "user_id"),
+                                    limit=limit,
+                                    offset=offset)
+    result = [formatting(item) for item in transactions]
     return SuccessResponse(result)
 
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['GET'])
 @auth()
-def get_transaction(transaction_id: int):
-    result = formatting(get_transaction_(user_id=getattr(request, "user_id"),
-                                         transaction_id=transaction_id)())
+def get_transaction(transaction_id: int, get_transaction=GetTransaction()):
+    result = formatting(get_transaction(user_id=getattr(request, "user_id"),
+                                        transaction_id=transaction_id))
     return SuccessResponse(result)
 
 
@@ -92,21 +91,22 @@ def update_transaction(transaction_id: int,
                        amount: float,
                        transaction_date: str,
                        private: bool,
-                       description=None):
-    result = formatting(create_or_update_transaction_(user_id=getattr(request, "user_id"),
-                                                      transaction_id=transaction_id,
-                                                      type=type,
-                                                      category_id=category,
-                                                      amount=amount,
-                                                      transaction_date=transaction_date,
-                                                      private=private,
-                                                      description=description)())
+                       description=None,
+                       create_or_update_transaction=CreateOrUpdateTransaction()):
+    result = formatting(create_or_update_transaction(user_id=getattr(request, "user_id"),
+                                                     transaction_id=transaction_id,
+                                                     type=type,
+                                                     category_id=category,
+                                                     amount=amount,
+                                                     transaction_date=transaction_date,
+                                                     private=private,
+                                                     description=description))
     return SuccessResponse(result)
 
 
 @transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['DELETE'])
 @auth()
-def delete_transaction(transaction_id: int):
-    result = delete_transaction_(user_id=getattr(request, "user_id"),
-                                 transaction_id=transaction_id)()
+def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction()):
+    result = delete_transaction(user_id=getattr(request, "user_id"),
+                                transaction_id=transaction_id)
     return SuccessResponse(f'{result} transactions deleted')

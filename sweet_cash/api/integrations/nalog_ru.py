@@ -3,17 +3,12 @@ import logging
 
 from api.api import check_phone_format
 from config import Config
-from api.services.user import User
-from api.services.nalog_ru_session import NalogRuSession
+from api.services.get_user import GetUser
+from api.services.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
+from api.services.get_nalog_ru_session import GetNalogRuSession
 import api.errors as error
 
 logger = logging.getLogger(name="nalog_ru")
-
-
-def create_or_update_session(user_id: str, session_id: str, refresh_token: str):
-    NalogRuSession(user_id=user_id,
-                   session_id=session_id,
-                   refresh_token=refresh_token).update()
 
 
 # Реализация синглтона через метакласс
@@ -44,11 +39,11 @@ class NalogRuApi(metaclass=Singleton):
                 logger.error(f'NalogRu API error. {arg} not in response. Response {response}')
                 raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
 
-    def send_otp_sms(self, user_id: str):
+    def send_otp_sms(self, user_id: str, get_user=GetUser()):
         """
         Send SMS with otp
         """
-        user = User(user_id=user_id).get()
+        user = get_user(user_id=user_id)
 
         if user is None:
             raise error.APIValueNotFound('User not found')
@@ -72,11 +67,13 @@ class NalogRuApi(metaclass=Singleton):
 
         self.check_response(response)
 
-    def verify_otp(self, user_id: str, otp: str):
+    def verify_otp(self, user_id: str, otp: str,
+                   get_user=GetUser(),
+                   create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()):
         """
         Verify otp from SMS
         """
-        user = User(user_id=user_id).get()
+        user = get_user(user_id=user_id)
 
         if user is None:
             raise error.APIValueNotFound('User not found')
@@ -102,13 +99,17 @@ class NalogRuApi(metaclass=Singleton):
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
 
-        create_or_update_session(user_id=user_id, session_id=session_id, refresh_token=refresh_token)
+        create_or_update_nalog_ru_session(user_id=user_id,
+                                          session_id=session_id,
+                                          refresh_token=refresh_token)
 
         logger.info(f'User {user_id} verified otp for phone {phone}')
 
-    def refresh_token(self, user_id: str) -> str:
+    def refresh_token(self, user_id: str,
+                      get_nalog_ru_session=GetNalogRuSession(),
+                      create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()) -> str:
 
-        session = NalogRuSession(user_id=user_id).get()
+        session = get_nalog_ru_session(user_id=user_id)
 
         if session is None:
             raise error.APIAuthError('User is not authorized in NalogRu Api')
@@ -134,7 +135,9 @@ class NalogRuApi(metaclass=Singleton):
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
 
-        create_or_update_session(user_id=user_id, session_id=session_id, refresh_token=refresh_token)
+        create_or_update_nalog_ru_session(user_id=user_id,
+                                          session_id=session_id,
+                                          refresh_token=refresh_token)
 
         logger.info(f'Updated session id and refresh token for user {user_id}')
 
@@ -176,15 +179,16 @@ class NalogRuApi(metaclass=Singleton):
 
         return ticket_id
 
-    def get_ticket(self, user_id: str, qr: str):
+    def get_ticket(self, user_id: str, qr: str, get_nalog_ru_session=GetNalogRuSession()):
         """
         Get JSON ticket
         :param user_id: user id
         :param qr: text from qr code. Example "t=20200727T174700&s=746.00&fn=9285000100206366&i=34929&fp=3951774668&n=1"
+        :param get_nalog_ru_session: class for getting NalogRu session
         :return: JSON ticket
         """
 
-        session = NalogRuSession(user_id=user_id).get()
+        session = get_nalog_ru_session(user_id=user_id)
 
         if session is None:
             raise error.APIAuthError('User is not authorized in NalogRu Api')

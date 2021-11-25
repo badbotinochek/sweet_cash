@@ -16,22 +16,17 @@ def convert_to_utc(ts: int):
 
 class CreateReceiptByQr:
 
-    def __init__(self, **kwargs):
-        self.user_id = kwargs.get("user_id")
-        self.qr = kwargs.get("qr")
-        self.receipt_id = None
-        self.receipt_data = None
+    def __call__(self, user_id, qr) -> ReceiptModel:
+        self.user_id = user_id
+        self.receipt_id, self.receipt_data = nalog_ru_api.get_ticket(user_id=user_id, qr=qr)
 
-    def __call__(self) -> ReceiptModel:
-        self.receipt_id, self.receipt_data = nalog_ru_api.get_ticket(user_id=self.user_id, qr=self.qr)
-
-        receipt = ReceiptModel.get_by_user(receipt_id=self.receipt_id, user_id=self.user_id)
+        receipt = ReceiptModel.get_by_user(receipt_id=self.receipt_id, user_id=user_id)
 
         if receipt is not None:
-            logger.warning(f'User {self.user_id} is trying to save a saved receipt')
+            logger.warning(f'User {user_id} is trying to save a saved receipt')
             raise error.APIConflict('Receipt has already been saved')
 
-        receipt = ReceiptModel(user_id=self.user_id,
+        receipt = ReceiptModel(user_id=user_id,
                                external_id=self.receipt_id,
                                data=self.receipt_data)
 
@@ -42,11 +37,11 @@ class CreateReceiptByQr:
 
         receipt.create()
 
-        logger.info(f'User {self.user_id} save receipt {self.receipt_id}')
+        logger.info(f'User {user_id} save receipt {self.receipt_id}')
 
         return receipt
 
-    def _save_transaction_by_receipt(self):
+    def _save_transaction_by_receipt(self, create_or_update_transaction=CreateOrUpdateTransaction()):
         if "operation" not in self.receipt_data and "dateTime" not in self.receipt_data:
             logger.error(f'Error saving transaction for receipt {self.receipt_id} with receipt '
                          f'data {self.receipt_data}')
@@ -57,11 +52,11 @@ class CreateReceiptByQr:
         type = "Income"
         category_id = 1  # TODO Искать категорию по наименованию
 
-        transaction = CreateOrUpdateTransaction(user_id=self.user_id,
-                                                type=type,
-                                                category_id=category_id,
-                                                amount=amount,
-                                                transaction_date=transaction_date)()
+        transaction = create_or_update_transaction(user_id=self.user_id,
+                                                   type=type,
+                                                   category_id=category_id,
+                                                   amount=amount,
+                                                   transaction_date=transaction_date)
 
         logger.info(f'User {self.user_id} create new transaction by receipt {self.receipt_id}')
 

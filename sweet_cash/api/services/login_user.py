@@ -3,7 +3,8 @@ import logging
 from api.api import check_email_format, check_password_format
 from api.models.users import UserModel
 from api.models.session import SessionModel
-from api.services.nalog_ru_session import NalogRuSession
+from api.services.get_nalog_ru_session import GetNalogRuSession
+
 import api.errors as error
 
 logger = logging.getLogger(name="auth")
@@ -11,59 +12,49 @@ logger = logging.getLogger(name="auth")
 
 class LoginUser:
 
-    def __init__(self, **kwargs):
-        self.user_id = kwargs.get("user_id")
-        self.name = kwargs.get("name")
-        self.email = kwargs.get("email")
-        self.password = kwargs.get("password")
-        self.login_method = kwargs.get("login_method")
-        self.auth_in_nalog_ru = False
-        self.token = None
-
-    def __call__(self):
-        if not check_email_format(self.email):
+    def __call__(self, email, password, login_method) -> dict:
+        if not check_email_format(email):
             raise error.APIParamError('Invalid email format')
 
-        if not check_password_format(self.password):
+        if not check_password_format(password):
             raise error.APIParamError('Invalid password format')
 
-        user = UserModel.get_user(self.email)
+        user = UserModel.get_user(email)
 
         if user is None:
-            logger.info(f'User with email {self.email} tried to login')
+            logger.info(f'User with email {email} tried to login')
             raise error.APIValueNotFound('User not registered')
 
-        if not user.check_password(self.password):
-            logger.info(f'User with email {self.email} try to login with wrong password')
+        if not user.check_password(password):
+            logger.info(f'User with email {email} try to login with wrong password')
             raise error.APIAuthError('Wrong password')
 
         self.user_id = user.id
 
-        self._new_token()
+        self._new_token(login_method)
 
-        # Check auth in NalogRu API for user
-        self._check_nalog_ru_auth()
-
-        logger.info(f'User {self.user_id} login with email {self.email}')
+        logger.info(f'User {self.user_id} login with email {email}')
 
         return {
             "access_token": self.token,
             "user_id": self.user_id,
-            "auth_in_nalog_ru": self.auth_in_nalog_ru
+            "auth_in_nalog_ru": self._check_nalog_ru_auth()
         }
 
-    def _new_token(self):
+    def _new_token(self, login_method):
         session = SessionModel.get(user_id=self.user_id)
 
         if session is not None:
-            session.update(login_method=self.login_method)
+            session.update(login_method=login_method)
         else:
-            session = SessionModel(user_id=self.user_id, login_method=self.login_method)
+            session = SessionModel(user_id=self.user_id, login_method=login_method)
             session.create()
 
         self.token = session.token
 
-    def _check_nalog_ru_auth(self):
-        nalog_ru_session = NalogRuSession(user_id=self.user_id).get()
+    # Check auth in NalogRu API for user
+    def _check_nalog_ru_auth(self, get_nalog_ru_session=GetNalogRuSession()):
+        nalog_ru_session = get_nalog_ru_session(user_id=self.user_id)
         if nalog_ru_session is not None:
-            self.auth_in_nalog_ru = True
+            return True
+        return False
