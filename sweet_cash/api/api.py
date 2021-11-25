@@ -2,20 +2,26 @@
 from flask import request, jsonify
 import re
 from flask_jwt_extended import jwt_required
+import logging
 
 from config import Config
 from api.models.session import SessionModel
+from api.models.transaction import TransactionModel
+from api.models.receipt import ReceiptModel
+from api.models.transaction_category import TransactionCategory
 import api.errors as error
 
 
-class Response(object):
-
-    @staticmethod
-    def success(data="Ok", code=200):
-        return jsonify(data), code
+logger = logging.getLogger(name="api")
 
 
-def auth(*args, **kwargs):
+class SuccessResponse(tuple):
+
+    def __new__(cls, data="Ok", code=200):
+        return super(SuccessResponse, cls).__new__(cls, tuple([jsonify(data), code]))
+
+
+def auth(*args):
 
     def decorator(func):
 
@@ -111,3 +117,30 @@ def check_password_format(password: str):
     regex = Config.PASSWORD_REGEX
     result = re.fullmatch(regex, password)
     return result
+
+
+def formatting(data) -> dict:
+    try:
+        formatted_data = {}
+        if type(data) is TransactionModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "type": data.type.value,
+                "category": TransactionCategory.get_name(data.category),
+                "amount": data.amount,
+                "transaction_date": data.transaction_date,
+                "private": data.private,
+                "description": data.description
+            }
+        elif type(data) is ReceiptModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "external_id": data.external_id,
+                "transaction_id": data.transaction_id
+            }
+        return formatted_data
+    except Exception as err:
+        logger.error(f'Formatting object {data} error {err}')
+        raise error.APIError(f'Formatting error')

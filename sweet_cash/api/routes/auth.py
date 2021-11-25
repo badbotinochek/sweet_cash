@@ -1,8 +1,8 @@
 from flask import Blueprint
 import logging
 
-from api.api import Response, jsonbody, features
-from api.services.user import User
+from api.api import SuccessResponse, jsonbody, features
+from api.dependencies import register_user_, login_user_
 
 logger = logging.getLogger(name="auth")
 
@@ -18,18 +18,16 @@ def register(name: str,
              email: str,
              phone: str,
              password: str):
-    User(name=name,
-         email=email,
-         phone=phone,
-         password=password).register()
-    return Response.success()
+    return SuccessResponse(register_user_(name=name,
+                                          email=email,
+                                          phone=phone,
+                                          password=password)())
 
 
 @auth_api.route('/api/v1/login', methods=['POST'])
 @jsonbody(email=features(type=str, required=True),
           password=features(type=str, required=True))
 def login(email: str, password: str):
-    result = User(email=email,
-                  password=password,
-                  login_method='email').login()
-    return Response.success(result)
+    return SuccessResponse(login_user_(email=email,
+                                       password=password,
+                                       login_method='email')())
