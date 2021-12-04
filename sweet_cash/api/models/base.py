@@ -6,6 +6,8 @@ from db import db
 
 class BaseModel(db.Model):
     __abstract__ = True
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
     def __getitem__(self, item):

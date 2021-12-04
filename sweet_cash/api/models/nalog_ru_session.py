@@ -7,8 +7,6 @@ from api.models.base import BaseModel
 
 class NalogRuSessionModel(BaseModel):
     __tablename__ = 'nalog_ru_sessions'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
     updated_at = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
     session_id = db.Column(db.String, nullable=False)

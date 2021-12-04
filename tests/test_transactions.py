@@ -28,11 +28,13 @@ def test_create_transaction_success():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
+            "number": "12124f",
+            "event_id": 1,
             "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -42,11 +44,12 @@ def test_create_transaction_success():
     assert response.headers["Content-Type"] == "application/json"
     assert "id" in response.json()
     assert "created_at" in response.json()
+    assert "event_id" in response.json()
     assert "type" in response.json()
     assert "category" in response.json()
     assert "amount" in response.json()
     assert "transaction_date" in response.json()
-    assert "private" in response.json()
+    assert "receipt_id" in response.json()
     assert "description" in response.json()
     TRANSACTION_ID = str(response.json()["id"])
 
@@ -55,11 +58,13 @@ def test_create_transaction_without_valid_token():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
+            "number": "12124f",
+            "event_id": 1,
             "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -82,16 +87,10 @@ def test_create_transaction_without_body():
     }
 
 
-def test_create_transaction_without_type():
+def test_create_transaction_without_required_params():
     response = requests.post(
         HOST + "/api/v1/transaction",
-        json={
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
+        json={},
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + TOKEN}
     )
@@ -99,158 +98,23 @@ def test_create_transaction_without_type():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error_code": "bad-params",
-        "message": "type is required",
+        "message": "Params ('number', 'event_id', 'type', 'category', 'amount', 'transaction_date') required",
         "status": 400
     }
 
 
-def test_create_transaction_without_category():
+def test_create_transaction_with_wrong_types_for_params():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": "Income",
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "category is required",
-        "status": 400
-    }
-
-
-def test_create_transaction_without_amount():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "amount is required",
-        "status": 400
-    }
-
-
-def test_create_transaction_without_transaction_date():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1.01,
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "transaction_date is required",
-        "status": 400
-    }
-
-
-def test_create_transaction_without_private():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "private is required",
-        "status": 400
-    }
-
-
-def test_create_transaction_without_description():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    assert "id" in response.json()
-    assert "created_at" in response.json()
-    assert "type" in response.json()
-    assert "category" in response.json()
-    assert "amount" in response.json()
-    assert "transaction_date" in response.json()
-    assert "private" in response.json()
-    assert "description" in response.json()
-    assert response.json()["description"] is None
-
-
-def test_create_transaction_wrong_type_type():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
+            "number": 1,
+            "event_id": "1313",
             "type": 1,
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for type",
-        "status": 400
-    }
-
-
-def test_create_transaction_wrong_category_type():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
             "category": "1",
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
+            "amount": -1,
+            "transaction_date": 1231341,
+            "receipt_id": "1",
+            "description": 1
         },
         headers={"Content-Type": "application/json",
                  "Authorization": "Bearer " + TOKEN}
@@ -259,135 +123,23 @@ def test_create_transaction_wrong_category_type():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error_code": "bad-params",
-        "message": "Invalid type for category",
+        "message": "Invalid type for params ('number', 'event_id', 'type', 'category', 'amount', 'transaction_date', "
+                   "'receipt_id', 'description')",
         "status": 400
     }
 
 
-def test_create_transaction_wrong_amount_type_1():
+def test_create_transaction_with_invalid_event_id():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
-            "type": "Income",
-            "category": 1,
-            "amount": "1.01",
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for amount",
-        "status": 400
-    }
-
-
-def test_create_transaction_wrong_amount_type_2():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for amount",
-        "status": 400
-    }
-
-
-def test_create_transaction_wrong_transaction_date_type():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": 0,
-            "private": False,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for transaction_date",
-        "status": 400
-    }
-
-
-def test_create_transaction_wrong_private_type():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
+            "number": "12124f",
+            "event_id": 0,
             "type": "Income",
             "category": 1,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": 1,
-            "description": "description"
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for private",
-        "status": 400
-    }
-
-
-def test_create_transaction_wrong_description_type():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Income",
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
-            "description": 0
-        },
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKEN}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for description",
-        "status": 400
-    }
-
-
-def test_create_transaction_with_invalid_type_id():
-    response = requests.post(
-        HOST + "/api/v1/transaction",
-        json={
-            "type": "Incoming",
-            "category": 1,
-            "amount": 1.01,
-            "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -397,6 +149,30 @@ def test_create_transaction_with_invalid_type_id():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error": "Not found",
+        "message": "User 1 not found in event 0"
+    }
+
+
+def test_create_transaction_with_invalid_type():
+    response = requests.post(
+        HOST + "/api/v1/transaction",
+        json={
+            "number": "12124f",
+            "event_id": 1,
+            "type": "Incoming",
+            "category": 1,
+            "amount": 1.01,
+            "transaction_date": "2021-10-10T04:25:03Z",
+            "receipt_id": 1,
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Request parameters error",
         "message": "Invalid transaction type Incoming"
     }
 
@@ -405,11 +181,13 @@ def test_create_transaction_with_invalid_category_id():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
+            "number": "12124f",
+            "event_id": 1,
             "type": "Income",
             "category": 0,
             "amount": 1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -427,11 +205,13 @@ def test_create_transaction_with_invalid_amount_1():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
+            "number": "12124f",
+            "event_id": 1,
             "type": "Income",
             "category": 1,
             "amount": -1.01,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -440,7 +220,7 @@ def test_create_transaction_with_invalid_amount_1():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Amount must be from 0 to 999999999999"
     }
 
@@ -449,11 +229,13 @@ def test_create_transaction_with_invalid_amount_2():
     response = requests.post(
         HOST + "/api/v1/transaction",
         json={
+            "number": "12124f",
+            "event_id": 1,
             "type": "Income",
             "category": 1,
             "amount": 1000000000000000.0,
             "transaction_date": "2021-10-10T04:25:03Z",
-            "private": False,
+            "receipt_id": 1,
             "description": "description"
         },
         headers={"Content-Type": "application/json",
@@ -462,8 +244,32 @@ def test_create_transaction_with_invalid_amount_2():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Amount must be from 0 to 999999999999"
+    }
+
+
+def test_create_transaction_with_invalid_receipt_id():
+    response = requests.post(
+        HOST + "/api/v1/transaction",
+        json={
+            "number": "12124f",
+            "event_id": 1,
+            "type": "Income",
+            "category": 1,
+            "amount": 1.01,
+            "transaction_date": "2021-10-10T04:25:03Z",
+            "receipt_id": 0,
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + TOKEN}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Receipt with id 0 not found for user 1"
     }
 
 

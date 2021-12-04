@@ -9,13 +9,11 @@ from api.models.base import BaseModel
 
 class SessionModel(BaseModel):
     __tablename__ = 'sessions'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
+    updated_at = db.Column(db.DateTime, nullable=True)
     token = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     login_method = db.Column(db.String, nullable=True)
     start = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         self.token = self.new_token()

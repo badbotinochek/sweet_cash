@@ -54,7 +54,7 @@ class Transaction:
 
         if self.transaction_id is not None:
 
-            transaction = TransactionModel.get(transaction_id=self.transaction_id, user_id=int(self.user_id))
+            transaction = TransactionModel.get_by_user(transaction_id=self.transaction_id, user_id=int(self.user_id))
 
             if transaction is None:
                 logger.warning(f'User {self.user_id} is trying to update a non-existent transaction {self.transaction_id}')
@@ -88,7 +88,7 @@ class Transaction:
         return transaction
 
     def get(self) -> dict:
-        transaction = TransactionModel.get(transaction_id=self.transaction_id, user_id=int(self.user_id))
+        transaction = TransactionModel.get_by_user(transaction_id=self.transaction_id, user_id=int(self.user_id))
         if transaction is None:
             logger.warning(f'User {self.user_id} is trying to get a non-existent transaction {self.transaction_id}')
             raise error.APIValueNotFound(f'Transaction {self.transaction_id} not found')

@@ -14,17 +14,21 @@ transactions_api = Blueprint('transactions', __name__)
 
 @transactions_api.route('/api/v1/transaction', methods=['POST'])
 @auth()
-@jsonbody(type=features(type=str, required=True),
+@jsonbody(number=features(type=str, required=True),
+          event_id=features(type=int, required=True),
+          type=features(type=str, required=True),
           category=features(type=int, required=True),
           amount=features(type=float, required=True),
           transaction_date=features(type=str, required=True),
-          private=features(type=bool, required=True),
+          receipt_id=features(type=int),
           description=features(type=str))
-def create_transaction(type: str,
+def create_transaction(number: str,
+                       event_id: int,
+                       type: str,
                        category: int,
                        amount: float,
                        transaction_date: str,
-                       private: bool,
+                       receipt_id=None,
                        description=None,
                        create_or_update_transaction=CreateOrUpdateTransaction()):
     """
@@ -47,13 +51,16 @@ def create_transaction(type: str,
         {
         }
     """
-    result = formatting(create_or_update_transaction(user_id=getattr(request, "user_id"),
+    result = formatting(create_or_update_transaction(number=number,
+                                                     event_id=event_id,
+                                                     user_id=getattr(request, "user_id"),
                                                      type=type,
                                                      category_id=category,
                                                      amount=amount,
                                                      transaction_date=transaction_date,
-                                                     private=private,
+                                                     receipt_id=receipt_id,
                                                      description=description))
+
     return SuccessResponse(result)
 
 

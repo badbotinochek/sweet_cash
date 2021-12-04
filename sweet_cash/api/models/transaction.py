@@ -17,37 +17,44 @@ class TransactionType(enum.Enum):
 
 class TransactionModel(BaseModel):
     __tablename__ = 'transactions'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Enum(TransactionType), nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=True)
+    number = db.Column(db.String(250), nullable=True)
     user_id = db.Column(db.Integer, index=True, nullable=False)
+    event_id = db.Column(db.Integer, index=True, nullable=False)
+    type = db.Column(db.Enum(TransactionType), nullable=False)
     category = db.Column(db.Integer, nullable=False)
     amount = db.Column(db.Float, nullable=False)
     transaction_date = db.Column(db.DateTime, nullable=False)
-    private = db.Column(db.Boolean, nullable=False, default=False)
     description = db.Column(db.String(250), nullable=True)
+    receipt_id = db.Column(db.Integer, nullable=True)
+    deleted = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
-        self.type = kwargs.get('type')
+        self.number = kwargs.get('number')
         self.user_id = kwargs.get('user_id')
+        self.event_id = kwargs.get('event_id')
+        self.type = kwargs.get('type')
         self.category = kwargs.get('category')
         self.amount = kwargs.get('amount')
         self.transaction_date = kwargs.get('transaction_date')
-        self.private = kwargs.get('private')
         self.description = kwargs.get('description')
+        self.receipt_id = kwargs.get('receipt_id')
 
     def update(self, **kwargs):
+        self.updated_at = datetime.utcnow().isoformat()
+        self.number = kwargs.get('number')
+        self.event_id = kwargs.get('event_id')
         self.type = kwargs.get('type')
-        self.category = kwargs.get('category_id')
+        self.category = kwargs.get('category')
         self.amount = kwargs.get('amount')
         self.transaction_date = kwargs.get('transaction_date')
-        self.private = kwargs.get('private')
+        self.receipt_id = kwargs.get('receipt_id')
         if kwargs.get('description') is not None:
             self.description = kwargs.get('description')
         db.session.commit()
 
     @classmethod
-    def get(cls, transaction_id: int, user_id: int):
+    def get_by_user(cls, transaction_id: int, user_id: int):
         transaction = cls.query.filter(cls.id == transaction_id, cls.user_id == user_id).first()
         return transaction
 

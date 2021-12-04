@@ -61,14 +61,28 @@ def jsonbody(*args, **kwargs):
 
     def decorator(func):
         def wrapper(**other_params):
+            # Checking for json body presence
             if not request.is_json:
                 return error.BadParams("Json required")
+
+            # Checking for required parameters and types
+            not_founded_required_params = []
+            invalid_types_params = []
+
             for k, v in kwargs.items():
                 parameter = request.json.get(k)
                 if parameter is None and v['required']:
-                    return error.BadParams(f'{k} is required')
+                    not_founded_required_params.append(k)
                 if parameter is not None and type(parameter) is not v['type']:
-                    return error.BadParams(f'Invalid type for {k}')
+                    invalid_types_params.append(k)
+
+            if len(not_founded_required_params) > 0:
+                return error.BadParams(f'Params {*not_founded_required_params,} required')
+
+            if len(invalid_types_params) > 0:
+                return error.BadParams(f'Invalid type for params {*invalid_types_params,}')
+
+            # Converting input parameters into function arguments
             data = clear_data(request.json, **kwargs)
             data.update(other_params)
             return func(*args, **data)
@@ -126,11 +140,15 @@ def formatting(data) -> dict:
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "number": data.number,
+                "user_id": data.user_id,
+                "event_id": data.event_id,
                 "type": data.type.value,
                 "category": TransactionCategory.get_name(data.category),
                 "amount": data.amount,
                 "transaction_date": data.transaction_date,
-                "private": data.private,
+                "receipt_id": data.receipt_id,
                 "description": data.description
             }
         elif type(data) is ReceiptModel:

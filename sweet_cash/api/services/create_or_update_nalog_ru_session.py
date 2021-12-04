@@ -1,6 +1,6 @@
 import logging
 
-from api.models.external_session import NalogRuSessionModel
+from api.models.nalog_ru_session import NalogRuSessionModel
 
 logger = logging.getLogger(name="auth")
 

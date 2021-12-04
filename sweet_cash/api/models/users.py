@@ -7,12 +7,11 @@ from api.models.base import BaseModel
 
 class UserModel(BaseModel):
     __tablename__ = 'users'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), nullable=False)
     email = db.Column(db.String(250), nullable=False, unique=True)
     phone = db.Column(db.String, nullable=False)
     password = db.Column(db.String(250), nullable=False)
+    deleted = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
