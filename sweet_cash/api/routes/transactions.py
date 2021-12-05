@@ -2,10 +2,10 @@ from flask import request, Blueprint
 import logging
 
 from api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
-from api.services.create_or_update_transaction import CreateOrUpdateTransaction
-from api.services.get_transaction import GetTransaction
-from api.services.get_transactions import GetTransactions
-from api.services.delete_transaction import DeleteTransaction
+from api.services.transactions.create_or_update_transaction import CreateOrUpdateTransaction
+from api.services.transactions.get_transaction import GetTransaction
+from api.services.transactions.get_transactions import GetTransactions
+from api.services.transactions.delete_transaction import DeleteTransaction
 
 logger = logging.getLogger(name="transactions")
 

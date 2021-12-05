@@ -3,9 +3,9 @@ import logging
 
 from api.api import check_phone_format
 from config import Config
-from api.services.get_user import GetUser
-from api.services.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
-from api.services.get_nalog_ru_session import GetNalogRuSession
+from api.services.users.get_user import GetUser
+from api.services.nalog_ru_sessions.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
+from api.services.nalog_ru_sessions.get_nalog_ru_session import GetNalogRuSession
 import api.errors as error
 
 logger = logging.getLogger(name="nalog_ru")

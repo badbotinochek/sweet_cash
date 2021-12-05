@@ -2,8 +2,9 @@ from flask import Blueprint
 import logging
 
 from api.api import SuccessResponse, jsonbody, features
-from api.services.register_user import RegisterUser
-from api.services.login_user import LoginUser
+from api.services.users.register_user import RegisterUser
+from api.services.users.login_user import LoginUser
+from api.services.users.get_access_token import GetAccessToken
 
 logger = logging.getLogger(name="auth")
 
@@ -35,3 +36,10 @@ def login(email: str,
     return SuccessResponse(login_user(email=email,
                                       password=password,
                                       login_method='email'))
+
+
+@auth_api.route('/api/v1/token', methods=['POST'])
+@jsonbody(refresh_token=features(type=str, required=True))
+def get_token(refresh_token: str,
+              get_access_token=GetAccessToken()):
+    return SuccessResponse(get_access_token(refresh_token=refresh_token))

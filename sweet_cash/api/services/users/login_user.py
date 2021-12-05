@@ -3,7 +3,7 @@ import logging
 from api.api import check_email_format, check_password_format
 from api.models.users import UserModel
 from api.models.session import SessionModel
-from api.services.get_nalog_ru_session import GetNalogRuSession
+from api.services.nalog_ru_sessions.get_nalog_ru_session import GetNalogRuSession
 
 import api.errors as error
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(name="auth")
 
 class LoginUser:
 
-    def __call__(self, email, password, login_method) -> dict:
+    def __call__(self, email: str, password: str, login_method: str) -> dict:
         if not check_email_format(email):
             raise error.APIParamError('Invalid email format')
 
@@ -31,17 +31,17 @@ class LoginUser:
 
         self.user_id = user.id
 
-        self._new_token(login_method)
+        self._update_session(login_method)
 
         logger.info(f'User {self.user_id} login with email {email}')
 
         return {
-            "access_token": self.token,
+            "refresh_token": self.refresh_token,
             "user_id": self.user_id,
             "auth_in_nalog_ru": self._check_nalog_ru_auth()
         }
 
-    def _new_token(self, login_method):
+    def _update_session(self, login_method):
         session = SessionModel.get(user_id=self.user_id)
 
         if session is not None:
@@ -50,7 +50,7 @@ class LoginUser:
             session = SessionModel(user_id=self.user_id, login_method=login_method)
             session.create()
 
-        self.token = session.token
+        self.refresh_token = session.refresh_token
 
     # Check auth in NalogRu API for user
     def _check_nalog_ru_auth(self, get_nalog_ru_session=GetNalogRuSession()):

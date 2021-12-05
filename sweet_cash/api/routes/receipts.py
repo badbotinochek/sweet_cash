@@ -2,7 +2,7 @@ from flask import request, Blueprint
 import logging
 
 from api.api import SuccessResponse, auth, jsonbody, features, formatting
-from api.services.create_receipt_by_qr import CreateReceiptByQr
+from api.services.receipts.create_receipt_by_qr import CreateReceiptByQr
 
 logger = logging.getLogger(name="receipts")
 

@@ -3,7 +3,7 @@ import logging
 
 from api.integrations.nalog_ru import NalogRuApi
 from api.models.receipt import ReceiptModel
-from api.services.create_or_update_transaction import CreateOrUpdateTransaction
+from api.services.transactions.create_or_update_transaction import CreateOrUpdateTransaction
 import api.errors as error
 
 logger = logging.getLogger(name="receipts")

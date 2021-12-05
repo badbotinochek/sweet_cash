@@ -1,8 +1,8 @@
 import logging
 
 from api.models.transaction_category import TransactionCategory
-from api.services.get_event_user import GetEventUser
-from api.services.get_receipt import GetReceipt
+from api.services.events.get_event_user import GetEventUser
+from api.services.receipts.get_receipt import GetReceipt
 from api.models.transaction import TransactionModel, TransactionType
 from config import Config
 import api.errors as error
