@@ -5,6 +5,8 @@ import logging
 
 from db import db
 from config import Config
+from api.services.notification_processing.notification_processor import NotificationProcessor
+from message_queue import MessageQueue
 
 
 logging.basicConfig(filename="../logs.log",
@@ -13,6 +15,8 @@ logging.basicConfig(filename="../logs.log",
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 app = Flask(__name__)
+
+messages_queue = MessageQueue()
 
 
 def create_app():
@@ -44,6 +48,12 @@ def create_app():
     app.register_blueprint(external_auth_api)
     app.register_blueprint(receipts_api)
     app.register_blueprint(error.blueprint)
+
+    # Run notification processing
+    processors_names = ['Processor-1']  # TODO в config
+    processors = [NotificationProcessor(name=name, q=messages_queue) for name in processors_names]
+    for processor in processors:
+        processor.start()
 
     return app
 

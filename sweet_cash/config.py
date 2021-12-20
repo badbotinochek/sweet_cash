@@ -16,3 +16,8 @@ class Config:
 
     MIN_TRANSACTION_AMOUNT = 0
     MAX_TRANSACTION_AMOUNT = 999999999999
+
+    SMTP_HOST = 'smtp.yandex.ru'
+    SMTP_PORT = 465
+    EMAIL_ADDRESS = 'dka45-1p@yandex.ru'
+    EMAIL_PASSWORD = 'gaytdrxsksdonwoh'

@@ -1,10 +1,12 @@
 from flask import Blueprint
 import logging
 
-from api.api import SuccessResponse, jsonbody, features
+from api.api import SuccessResponse, jsonbody, features, query_params
 from api.services.users.register_user import RegisterUser
 from api.services.users.login_user import LoginUser
 from api.services.users.get_access_token import GetAccessToken
+from api.services.users.confirm_user import ConfirmUser
+from api.services.email_sending.send_email import SendEmail
 
 logger = logging.getLogger(name="auth")
 
@@ -43,3 +45,19 @@ def login(email: str,
 def get_token(refresh_token: str,
               get_access_token=GetAccessToken()):
     return SuccessResponse(get_access_token(refresh_token=refresh_token))
+
+
+@auth_api.route('/api/v1/confirm', methods=['GET'])
+@query_params(email=features(type=str, required=True),
+              confirmation_code=features(type=str, required=True))
+def confirm_registration(email: str,
+                         confirmation_code: str,
+                         confirm_user=ConfirmUser()):
+    return confirm_user(email=email, confirmation_code=confirmation_code), 200
+
+
+@auth_api.route('/api/v1/confirmation_code', methods=['GET'])
+@query_params(email=features(type=str, required=True))
+def send_confirmation_code(email: str,
+                           send_email=SendEmail()):
+    return SuccessResponse(send_email(email=email))

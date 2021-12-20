@@ -2,6 +2,7 @@ import logging
 
 from api.api import check_email_format, check_password_format, check_phone_format
 from api.models.users import UserModel
+from api.services.email_sending.send_email import SendEmail
 import api.errors as error
 
 logger = logging.getLogger(name="auth")
@@ -9,7 +10,7 @@ logger = logging.getLogger(name="auth")
 
 class RegisterUser:
 
-    def __call__(self, email, name, phone, password):
+    def __call__(self, email: str, name: str, phone: str, password: str, send_email=SendEmail()):
         if not check_email_format(email):
             raise error.APIParamError('Invalid email format')
 
@@ -34,5 +35,7 @@ class RegisterUser:
         logger.info(f'Created new user {user.id}')
 
         logger.info(f'User {user.id} registered with email {email}')
+
+        send_email(email=email)
 
         return "Ok"
