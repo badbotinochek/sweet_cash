@@ -35,7 +35,7 @@ class UserModel(BaseModel):
         return "<User(name='{}', email='{}', password={}".format(self.name, self.email, self.password)
 
     @classmethod
-    def get(cls, user_id: str) -> db.Model:
+    def get(cls, user_id: int) -> db.Model:
         user = cls.query.filter(cls.id == user_id).first()
         return user
 

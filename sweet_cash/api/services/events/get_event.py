@@ -8,7 +8,7 @@ logger = logging.getLogger(name="transactions")
 
 class GetEvent:
 
-    def __call__(self, event_id, user_id) -> EventModel:
+    def __call__(self, event_id: int, user_id: int) -> EventModel:
         event = EventModel.get_by_user(event_id=event_id, user_id=int(user_id))
         if event is None:
             logger.warning(f'User {user_id} is trying to get a non-existent event {event_id}')

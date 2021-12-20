@@ -8,7 +8,7 @@ logger = logging.getLogger(name="transactions")
 
 class GetReceipt:
 
-    def __call__(self, user_id, receipt_id) -> ReceiptModel:
+    def __call__(self, user_id: int, receipt_id: int) -> ReceiptModel:
         receipt = ReceiptModel.get_by_user(receipt_id=receipt_id, user_id=int(user_id))
         if receipt is None:
             logger.warning(f'User {user_id} is trying to get a non-existent receipt {receipt_id}')

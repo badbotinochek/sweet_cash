@@ -39,7 +39,7 @@ class NalogRuApi(metaclass=Singleton):
                 logger.error(f'NalogRu API error. {arg} not in response. Response {response}')
                 raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
 
-    def send_otp_sms(self, user_id: str, get_user=GetUser()):
+    def send_otp_sms(self, user_id: int, get_user=GetUser()):
         """
         Send SMS with otp
         """
@@ -67,7 +67,7 @@ class NalogRuApi(metaclass=Singleton):
 
         self.check_response(response)
 
-    def verify_otp(self, user_id: str, otp: str,
+    def verify_otp(self, user_id: int, otp: str,
                    get_user=GetUser(),
                    create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()):
         """
@@ -105,7 +105,7 @@ class NalogRuApi(metaclass=Singleton):
 
         logger.info(f'User {user_id} verified otp for phone {phone}')
 
-    def refresh_token(self, user_id: str,
+    def refresh_token(self, user_id: int,
                       get_nalog_ru_session=GetNalogRuSession(),
                       create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()) -> str:
 
@@ -143,7 +143,7 @@ class NalogRuApi(metaclass=Singleton):
 
         return session_id
 
-    def __get_ticket_id(self, user_id: str, session_id: str, qr: str) -> str:
+    def __get_ticket_id(self, user_id: int, session_id: int, qr: str) -> str:
         """
         Get ticker id by info from qr code
         :param session_id: session id for auth
@@ -179,7 +179,7 @@ class NalogRuApi(metaclass=Singleton):
 
         return ticket_id
 
-    def get_ticket(self, user_id: str, qr: str, get_nalog_ru_session=GetNalogRuSession()):
+    def get_ticket(self, user_id: int, qr: str, get_nalog_ru_session=GetNalogRuSession()):
         """
         Get JSON ticket
         :param user_id: user id

@@ -7,7 +7,7 @@ logger = logging.getLogger(name="auth")
 
 class CreateOrUpdateNalogRuSession:
 
-    def __call__(self, user_id, session_id, refresh_token) -> NalogRuSessionModel:
+    def __call__(self, user_id: int, session_id: int, refresh_token: str) -> NalogRuSessionModel:
         session = NalogRuSessionModel.get_by_user(user_id=int(user_id))
         if session is None:
             session = NalogRuSessionModel(user_id=user_id,

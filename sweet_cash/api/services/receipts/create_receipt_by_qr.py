@@ -16,7 +16,7 @@ def convert_to_utc(ts: int):
 
 class CreateReceiptByQr:
 
-    def __call__(self, user_id, qr) -> ReceiptModel:
+    def __call__(self, user_id: int, qr) -> ReceiptModel:
         self.user_id = user_id
         self.receipt_id, self.receipt_data = nalog_ru_api.get_ticket(user_id=user_id, qr=qr)
 
