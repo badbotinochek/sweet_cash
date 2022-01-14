@@ -13,7 +13,7 @@ logger = logging.getLogger(name="auth")
 auth_api = Blueprint('login', __name__)
 
 
-@auth_api.route('/api/v1/register', methods=['POST'])
+@auth_api.route('/api/v1/auth/register', methods=['POST'])
 @jsonbody(name=features(type=str, required=True),
           email=features(type=str, required=True),
           phone=features(type=str, required=True),
@@ -29,7 +29,7 @@ def register(name: str,
                                          password=password))
 
 
-@auth_api.route('/api/v1/login', methods=['POST'])
+@auth_api.route('/api/v1/auth/login', methods=['POST'])
 @jsonbody(email=features(type=str, required=True),
           password=features(type=str, required=True))
 def login(email: str,
@@ -40,23 +40,23 @@ def login(email: str,
                                       login_method='email'))
 
 
-@auth_api.route('/api/v1/token', methods=['POST'])
+@auth_api.route('/api/v1/auth/token', methods=['POST'])
 @jsonbody(refresh_token=features(type=str, required=True))
 def get_token(refresh_token: str,
               get_access_token=GetAccessToken()):
     return SuccessResponse(get_access_token(refresh_token=refresh_token))
 
 
-@auth_api.route('/api/v1/confirm', methods=['GET'])
+@auth_api.route('/api/v1/auth/confirm', methods=['GET'])
 @query_params(email=features(type=str, required=True),
-              confirmation_code=features(type=str, required=True))
+              code=features(type=str, required=True))
 def confirm_registration(email: str,
-                         confirmation_code: str,
+                         code: str,
                          confirm_user=ConfirmUser()):
-    return confirm_user(email=email, confirmation_code=confirmation_code), 200
+    return confirm_user(email=email, confirmation_code=code), 200
 
 
-@auth_api.route('/api/v1/confirmation_code', methods=['GET'])
+@auth_api.route('/api/v1/auth/code', methods=['GET'])
 @query_params(email=features(type=str, required=True))
 def send_confirmation_code(email: str,
                            send_email=SendEmail()):

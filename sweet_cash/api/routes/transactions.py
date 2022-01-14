@@ -12,7 +12,7 @@ logger = logging.getLogger(name="transactions")
 transactions_api = Blueprint('transactions', __name__)
 
 
-@transactions_api.route('/api/v1/transaction', methods=['POST'])
+@transactions_api.route('/api/v1/transactions', methods=['POST'])
 @auth()
 @jsonbody(number=features(type=str, required=True),
           event_id=features(type=int, required=True),
@@ -76,7 +76,7 @@ def get_transactions(limit=100, offset=0, get_transactions=GetTransactions()):
     return SuccessResponse(result)
 
 
-@transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['GET'])
+@transactions_api.route('/api/v1/transactions/<int:transaction_id>', methods=['GET'])
 @auth()
 def get_transaction(transaction_id: int, get_transaction=GetTransaction()):
     result = formatting(get_transaction(user_id=getattr(request, "user_id"),
@@ -84,7 +84,7 @@ def get_transaction(transaction_id: int, get_transaction=GetTransaction()):
     return SuccessResponse(result)
 
 
-@transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['PUT'])
+@transactions_api.route('/api/v1/transactions/<int:transaction_id>', methods=['PUT'])
 @auth()
 @jsonbody(type=features(type=str, required=True),
           category=features(type=int, required=True),
@@ -111,7 +111,7 @@ def update_transaction(transaction_id: int,
     return SuccessResponse(result)
 
 
-@transactions_api.route('/api/v1/transaction/<int:transaction_id>', methods=['DELETE'])
+@transactions_api.route('/api/v1/transactions/<int:transaction_id>', methods=['DELETE'])
 @auth()
 def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction()):
     result = delete_transaction(user_id=getattr(request, "user_id"),
