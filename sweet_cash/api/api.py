@@ -1,14 +1,27 @@
 
-from flask import request
+from flask import request, jsonify
 import re
 from flask_jwt_extended import jwt_required
+import logging
 
 from config import Config
 from api.models.session import SessionModel
+from api.models.transaction import TransactionModel
+from api.models.receipt import ReceiptModel
+from api.models.transaction_category import TransactionCategory
 import api.errors as error
 
 
-def auth(*args, **kwargs):
+logger = logging.getLogger(name="api")
+
+
+class SuccessResponse(tuple):
+
+    def __new__(cls, data="Ok", code=200):
+        return super(SuccessResponse, cls).__new__(cls, tuple([jsonify(data), code]))
+
+
+def auth(*args):
 
     def decorator(func):
 
@@ -48,14 +61,28 @@ def jsonbody(*args, **kwargs):
 
     def decorator(func):
         def wrapper(**other_params):
+            # Checking for json body presence
             if not request.is_json:
                 return error.BadParams("Json required")
+
+            # Checking for required parameters and types
+            not_founded_required_params = []
+            invalid_types_params = []
+
             for k, v in kwargs.items():
                 parameter = request.json.get(k)
                 if parameter is None and v['required']:
-                    return error.BadParams(f'{k} is required')
+                    not_founded_required_params.append(k)
                 if parameter is not None and type(parameter) is not v['type']:
-                    return error.BadParams(f'Invalid type for {k}')
+                    invalid_types_params.append(k)
+
+            if len(not_founded_required_params) > 0:
+                return error.BadParams(f'Params {*not_founded_required_params,} required')
+
+            if len(invalid_types_params) > 0:
+                return error.BadParams(f'Invalid type for params {*invalid_types_params,}')
+
+            # Converting input parameters into function arguments
             data = clear_data(request.json, **kwargs)
             data.update(other_params)
             return func(*args, **data)
@@ -104,3 +131,34 @@ def check_password_format(password: str):
     regex = Config.PASSWORD_REGEX
     result = re.fullmatch(regex, password)
     return result
+
+
+def formatting(data) -> dict:
+    try:
+        formatted_data = {}
+        if type(data) is TransactionModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "number": data.number,
+                "user_id": data.user_id,
+                "event_id": data.event_id,
+                "type": data.type.value,
+                "category": TransactionCategory.get_name(data.category),
+                "amount": data.amount,
+                "transaction_date": data.transaction_date,
+                "receipt_id": data.receipt_id,
+                "description": data.description
+            }
+        elif type(data) is ReceiptModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "external_id": data.external_id,
+                "transaction_id": data.transaction_id
+            }
+        return formatted_data
+    except Exception as err:
+        logger.error(f'Formatting object {data} error {err}')
+        raise error.APIError(f'Formatting error')

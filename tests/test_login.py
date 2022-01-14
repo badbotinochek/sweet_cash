@@ -6,6 +6,7 @@ HOST = 'http://127.0.0.1:5000'
 EMAIL = "test1@test.com"
 PHONE = '+79001234567'
 PASSWORD = "1@yAndexru"
+REFRESH_TOKEN = None
 TOKEN = None
 
 
@@ -29,149 +30,41 @@ def test_register_success():
     assert response.headers["Content-Type"] == "application/json"
 
 
-def test_register_without_name():
+def test_register_without_body():
+    response = requests.post(
+        HOST + "/api/v1/register"
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Json required",
+        "status": 400
+    }
+
+
+def test_register_without_required_params():
     response = requests.post(
         HOST + "/api/v1/register",
-        json={
-            "email": EMAIL,
-            "phone": PHONE,
-            "password": PASSWORD
-        },
+        json={},
         headers={"Content-Type": "application/json"}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error_code": "bad-params",
-        "message": "name is required",
+        "message": "Params ('name', 'email', 'phone', 'password') required",
         "status": 400
     }
 
 
-def test_register_without_email():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
-            "phone": PHONE,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "email is required",
-        "status": 400
-    }
-
-
-def test_register_without_phone():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
-            "email": EMAIL,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "phone is required",
-        "status": 400
-    }
-
-
-def test_register_without_password():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
-            "email": EMAIL,
-            "phone": PHONE
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "password is required",
-        "status": 400
-    }
-
-
-def test_register_with_wrong_name_type():
+def test_register_with_wrong_types_for_params():
     response = requests.post(
         HOST + "/api/v1/register",
         json={
             "name": 1,
-            "email": EMAIL,
-            "phone": PHONE,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for name",
-        "status": 400
-    }
-
-
-def test_register_with_wrong_email_type():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
             "email": 1,
-            "phone": PHONE,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for email",
-        "status": 400
-    }
-
-
-def test_register_with_wrong_phone_type():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
-            "email": EMAIL,
             "phone": 1,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for phone",
-        "status": 400
-    }
-
-
-def test_register_with_wrong_password_type():
-    response = requests.post(
-        HOST + "/api/v1/register",
-        json={
-            "name": EMAIL,
-            "email": EMAIL,
-            "phone": PHONE,
             "password": 1
         },
         headers={"Content-Type": "application/json"}
@@ -180,7 +73,7 @@ def test_register_with_wrong_password_type():
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
         "error_code": "bad-params",
-        "message": "Invalid type for password",
+        "message": "Invalid type for params ('name', 'email', 'phone', 'password')",
         "status": 400
     }
 
@@ -199,7 +92,7 @@ def test_register_with_invalid_email_format():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Invalid email format"
     }
 
@@ -218,7 +111,7 @@ def test_register_with_invalid_phone_format():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Invalid phone format"
     }
 
@@ -237,21 +130,8 @@ def test_register_with_invalid_password_format():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Invalid password format"
-    }
-
-
-def test_register_without_body():
-    response = requests.post(
-        HOST + "/api/v1/register"
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Json required",
-        "status": 400
     }
 
 
@@ -280,6 +160,7 @@ TEST LOGIN
 
 
 def test_login_success():
+    global REFRESH_TOKEN
     response = requests.post(
         HOST + "/api/v1/login",
         json={
@@ -290,13 +171,60 @@ def test_login_success():
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    assert "access_token" in response.json()
+    assert "refresh_token" in response.json()
     assert "user_id" in response.json()
     assert "auth_in_nalog_ru" in response.json()
-    TOKEN = response.json()["access_token"]
+    REFRESH_TOKEN = response.json()["refresh_token"]
 
 
-def test_login_new_token():
+def test_login_without_body():
+    response = requests.post(
+        HOST + "/api/v1/login"
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Json required",
+        "status": 400
+    }
+
+
+def test_login_without_required_params():
+    response = requests.post(
+        HOST + "/api/v1/login",
+        json={},
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Params ('email', 'password') required",
+        "status": 400
+    }
+
+
+def test_login_with_wrong_types_for_params():
+    response = requests.post(
+        HOST + "/api/v1/login",
+        json={
+            "email": 1,
+            "password": 1
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Invalid type for params ('email', 'password')",
+        "status": 400
+    }
+
+
+def test_login_with_new_refresh_token():
+    global REFRESH_TOKEN
     response = requests.post(
         HOST + "/api/v1/login",
         json={
@@ -307,13 +235,14 @@ def test_login_new_token():
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    assert "access_token" in response.json()
+    assert "refresh_token" in response.json()
     assert "user_id" in response.json()
     assert "auth_in_nalog_ru" in response.json()
-    assert response.json()["access_token"] != TOKEN
+    assert response.json()["refresh_token"] != REFRESH_TOKEN
+    REFRESH_TOKEN = response.json()["refresh_token"]
 
 
-def test_login_wrong_password():
+def test_login_with_wrong_password():
     response = requests.post(
         HOST + "/api/v1/login",
         json={
@@ -330,76 +259,6 @@ def test_login_wrong_password():
     }
 
 
-def test_login_without_email():
-    response = requests.post(
-        HOST + "/api/v1/login",
-        json={
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "email is required",
-        "status": 400
-    }
-
-
-def test_login_without_password():
-    response = requests.post(
-        HOST + "/api/v1/login",
-        json={
-            "email": EMAIL
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "password is required",
-        "status": 400
-    }
-
-
-def test_login_with_wrong_email_type():
-    response = requests.post(
-        HOST + "/api/v1/login",
-        json={
-            "email": 1,
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for email",
-        "status": 400
-    }
-
-
-def test_login_with_wrong_password_type():
-    response = requests.post(
-        HOST + "/api/v1/login",
-        json={
-            "email": EMAIL,
-            "password": 1
-        },
-        headers={"Content-Type": "application/json"}
-    )
-    assert response.status_code == 400
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
-        "error_code": "bad-params",
-        "message": "Invalid type for password",
-        "status": 400
-    }
-
-
 def test_login_with_invalid_email_format():
     response = requests.post(
         HOST + "/api/v1/login",
@@ -412,14 +271,37 @@ def test_login_with_invalid_email_format():
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
     assert response.json() == {
-        "error": "Request parameters Error",
+        "error": "Request parameters error",
         "message": "Invalid email format"
     }
 
 
-def test_login_without_body():
+'''
+TEST GETTING TOKEN
+'''
+
+
+def test_getting_token_success():
+    global REFRESH_TOKEN, TOKEN
     response = requests.post(
-        HOST + "/api/v1/login"
+        HOST + "/api/v1/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert "refresh_token" in response.json()
+    assert "token" in response.json()
+    assert response.json()["refresh_token"] != REFRESH_TOKEN
+    REFRESH_TOKEN = response.json()["refresh_token"]
+    TOKEN = response.json()["token"]
+
+
+def test_getting_token_without_body():
+    response = requests.post(
+        HOST + "/api/v1/token"
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
@@ -427,4 +309,86 @@ def test_login_without_body():
         "error_code": "bad-params",
         "message": "Json required",
         "status": 400
+    }
+
+
+def test_getting_token_without_required_params():
+    response = requests.post(
+        HOST + "/api/v1/token",
+        json={},
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Params ('refresh_token',) required",
+        "status": 400
+    }
+
+
+def test_getting_token_with_wrong_types_for_params():
+    response = requests.post(
+        HOST + "/api/v1/token",
+        json={
+            "refresh_token": 1
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Invalid type for params ('refresh_token',)",
+        "status": 400
+    }
+
+
+def test_getting_new_token():
+    global REFRESH_TOKEN, TOKEN
+    response = requests.post(
+        HOST + "/api/v1/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    assert "refresh_token" in response.json()
+    assert "token" in response.json()
+    assert response.json()["refresh_token"] != REFRESH_TOKEN
+    assert response.json()["token"] != TOKEN
+    TOKEN = response.json()["token"]
+
+
+def test_getting_token_with_old_refresh_token():
+    response = requests.post(
+        HOST + "/api/v1/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Token not found"
+    }
+
+
+def test_getting_token_with_wrong_refresh_token():
+    response = requests.post(
+        HOST + "/api/v1/token",
+        json={
+            "refresh_token": "1"
+        },
+        headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error": "Not found",
+        "message": "Token not found"
     }

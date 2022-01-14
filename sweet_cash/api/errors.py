@@ -20,7 +20,7 @@ class APIAuthError(APIError):
 class APIParamError(APIError):
     """Custom Request Parameters Error Class."""
     code = 400
-    description = "Request parameters Error"
+    description = "Request parameters error"
 
 
 class APIValueNotFound(APIError):

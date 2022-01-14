@@ -6,14 +6,22 @@ HOST = 'http://127.0.0.1:5000'
 EMAIL = "test1@test.com"
 PASSWORD = "1@yAndexru"
 
-TOKEN = requests.post(
+REFRESH_TOKEN = requests.post(
     HOST + "/api/v1/login",
     json={
         "email": EMAIL,
         "password": PASSWORD
     },
     headers={"Content-Type": "application/json"}
-).json()["access_token"]
+).json()["refresh_token"]
+
+TOKEN = requests.post(
+    HOST + "/api/v1/token",
+    json={
+        "refresh_token": REFRESH_TOKEN
+    },
+    headers={"Content-Type": "application/json"}
+).json()["token"]
 
 TRANSACTION_CATEGORY_ID = ''
 

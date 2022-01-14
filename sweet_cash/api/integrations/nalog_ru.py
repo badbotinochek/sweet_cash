@@ -2,49 +2,53 @@ import requests
 import logging
 
 from api.api import check_phone_format
-from sweet_cash.config import Config
-from api.models.users import UserModel
-from api.models.external_session import NalogRuSessionModel
+from config import Config
+from api.services.users.get_user import GetUser
+from api.services.nalog_ru_sessions.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
+from api.services.nalog_ru_sessions.get_nalog_ru_session import GetNalogRuSession
 import api.errors as error
-from db import db
 
 logger = logging.getLogger(name="nalog_ru")
 
 
-def create_or_update_session(user_id: str, session_id: str, refresh_token: str):
-    external_session = NalogRuSessionModel.get_by_user(user_id=user_id)
+# Реализация синглтона через метакласс
+class Singleton(type):
+    _instances = {}
 
-    if external_session is None:
-        external_session = NalogRuSessionModel(user_id=user_id,
-                                               session_id=session_id,
-                                               refresh_token=refresh_token)
-        external_session.create()
-
-        logger.info(f'Created new NalogRuSession for user {user_id}')
-
-    else:
-        external_session.update(session_id=session_id,
-                                refresh_token=refresh_token)
-
-        logger.info(f'Updated NalogRuSession for user {user_id}')
-
-    db.session.commit()
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
-class NalogRuApi:
+class NalogRuApi(metaclass=Singleton):
     HOST = Config.NALOG_RU_HOST
     CLIENT_SECRET = Config.NALOG_RU_CLIENT_SECRET
     OS = Config.NALOG_RU_OS
     DEVICE_OS = Config.NALOG_RU_DEVICE_OS
     DEVICE_ID = Config.NALOG_RU_DEVICE_ID
+    SUCCESS_CODE = [200, 204]
 
-    def send_otp_sms(self, user_id: str):
+    def check_response(self, response, *args):
+        if response.status_code in self.SUCCESS_CODE:
+            logger.error(f'NalogRu API error. Response {response}')
+            raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+
+        for arg in args:
+            if arg not in response.json():
+                logger.error(f'NalogRu API error. {arg} not in response. Response {response}')
+                raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
+
+    def send_otp_sms(self, user_id: int, get_user=GetUser()):
         """
         Send SMS with otp
         """
-        user = UserModel.get(user_id=user_id)
+        user = get_user(user_id=user_id)
 
-        phone = user.get_phone()
+        if user is None:
+            raise error.APIValueNotFound('User not found')
+
+        phone = user.phone
 
         if not check_phone_format(phone):
             raise error.APIParamError('Invalid phone format')
@@ -61,15 +65,20 @@ class NalogRuApi:
 
         logger.info(f'User {user_id} is trying to send otp SMS')
 
-        return response.text, response.status_code
+        self.check_response(response)
 
-    def verify_otp(self, user_id: str, otp: str):
+    def verify_otp(self, user_id: int, otp: str,
+                   get_user=GetUser(),
+                   create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()):
         """
         Verify otp from SMS
         """
-        user = UserModel.get(user_id=user_id)
+        user = get_user(user_id=user_id)
 
-        phone = user.get_phone()
+        if user is None:
+            raise error.APIValueNotFound('User not found')
+
+        phone = user.phone
 
         if not check_phone_format(phone):
             raise error.APIError('Invalid phone format')
@@ -85,26 +94,27 @@ class NalogRuApi:
 
         response = requests.post(url, json=payload)
 
-        if 'application/json' not in response.headers.get('content-Type') or \
-                'sessionId' not in response.json() or "refresh_token" not in response.json():
-            logger.error(f'Error verification otp {otp} for phone {phone}. Response from NalogRu {response}')
-            raise error.APIError(response.text, response.status_code)
+        self.check_response(response, "sessionId", "refresh_token")
 
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
 
-        create_or_update_session(user_id=user_id, session_id=session_id, refresh_token=refresh_token)
+        create_or_update_nalog_ru_session(user_id=user_id,
+                                          session_id=session_id,
+                                          refresh_token=refresh_token)
 
         logger.info(f'User {user_id} verified otp for phone {phone}')
 
-    def refresh_token(self, user_id: str) -> str:
+    def refresh_token(self, user_id: int,
+                      get_nalog_ru_session=GetNalogRuSession(),
+                      create_or_update_nalog_ru_session=CreateOrUpdateNalogRuSession()) -> str:
 
-        session = NalogRuSessionModel.get_by_user(user_id=user_id)
+        session = get_nalog_ru_session(user_id=user_id)
 
         if session is None:
             raise error.APIAuthError('User is not authorized in NalogRu Api')
 
-        refresh_token = session.get_refresh_token()
+        refresh_token = session.refresh_token
 
         url = f'{self.HOST}/v2/mobile/users/refresh'
 
@@ -120,21 +130,20 @@ class NalogRuApi:
 
         response = requests.post(url, json=payload, headers=headers)
 
-        if 'application/json' not in response.headers.get('content-Type') or \
-                'sessionId' not in response.json() or "refresh_token" not in response.json():
-            logger.error(f'Error refresh token. Response from NalogRu {response}')
-            raise error.APIError(response.text, response.status_code)
+        self.check_response(response, "sessionId", "refresh_token")
 
         session_id = response.json()["sessionId"]
         refresh_token = response.json()["refresh_token"]
 
-        create_or_update_session(user_id=user_id, session_id=session_id, refresh_token=refresh_token)
+        create_or_update_nalog_ru_session(user_id=user_id,
+                                          session_id=session_id,
+                                          refresh_token=refresh_token)
 
         logger.info(f'Updated session id and refresh token for user {user_id}')
 
         return session_id
 
-    def __get_ticket_id(self, user_id: str, session_id: str, qr: str) -> str:
+    def __get_ticket_id(self, user_id: int, session_id: int, qr: str) -> str:
         """
         Get ticker id by info from qr code
         :param session_id: session id for auth
@@ -162,9 +171,7 @@ class NalogRuApi:
 
             response = requests.post(url, json=payload, headers=headers)
 
-        if 'application/json' not in response.headers.get('content-Type') or 'id' not in response.json():
-            logger.error(f'Error getting ticket id. Response from NalogRu {response}')
-            raise error.APIError(response.text, response.status_code)
+        self.check_response(response, "id")
 
         ticket_id = response.json()["id"]
 
@@ -172,20 +179,21 @@ class NalogRuApi:
 
         return ticket_id
 
-    def get_ticket(self, user_id: str, qr: str):
+    def get_ticket(self, user_id: int, qr: str, get_nalog_ru_session=GetNalogRuSession()):
         """
         Get JSON ticket
         :param user_id: user id
         :param qr: text from qr code. Example "t=20200727T174700&s=746.00&fn=9285000100206366&i=34929&fp=3951774668&n=1"
+        :param get_nalog_ru_session: class for getting NalogRu session
         :return: JSON ticket
         """
 
-        session = NalogRuSessionModel.get_by_user(user_id=user_id)
+        session = get_nalog_ru_session(user_id=user_id)
 
         if session is None:
             raise error.APIAuthError('User is not authorized in NalogRu Api')
 
-        session_id = session.get_session_id()
+        session_id = session.session_id
 
         ticket_id = self.__get_ticket_id(user_id=user_id, session_id=session_id, qr=qr)
 
@@ -198,121 +206,8 @@ class NalogRuApi:
 
         response = requests.get(url, headers=headers)
 
-        if 'application/json' not in response.headers.get('content-Type'):
-            logger.error(f'Error getting ticket. Response from NalogRu {response}')
-            raise error.APIError(response.text, response.status_code)
+        self.check_response(response, "id")
 
         logger.info(f'Got ticket {ticket_id} for user {user_id}')
 
         return ticket_id, response.json()
-
-# class NalogRu:
-#     HOST = Config.NALOG_RU_HOST
-#     CLIENT_SECRET = Config.NALOG_RU_CLIENT_SECRET
-#     OS = Config.NALOG_RU_OS
-#
-#     def __init__(self, session_id=None, refresh_token=None):
-#         self.__phone = None
-#         self.__code = None
-#         self.__session_id = session_id
-#         self.__refresh_token = refresh_token
-#         if session_id is None:
-#             self.set_session_id()
-#
-#     def set_session_id(self) -> None:
-#         """
-#         Authorization using phone and SMS code
-#         """
-#         self.__phone = str(input('Input phone in +70000000000 format: '))
-#
-#         url = f'{self.HOST}/v2/auth/phone/request'
-#
-#         payload = {
-#             'phone': self.__phone,
-#             'client_secret': self.CLIENT_SECRET,
-#             'os': self.OS
-#         }
-#
-#         resp = requests.post(url, json=payload)
-#
-#         self.__code = input('Input code from SMS: ')
-#
-#         url = f'{self.HOST}/v2/auth/phone/verify'
-#
-#         payload = {
-#             'phone': self.__phone,
-#             'client_secret': self.CLIENT_SECRET,
-#             'code': self.__code,
-#             "os": self.OS
-#         }
-#
-#         resp = requests.post(url, json=payload)
-#
-#         self.__session_id = resp.json()['sessionId']
-#         self.__refresh_token = resp.json()['refresh_token']
-#
-#         print(resp.json()['sessionId'])
-#         print(resp.json()['refresh_token'])
-#
-#     def refresh_token_function(self) -> None:
-#         url = f'{self.HOST}/v2/mobile/users/refresh'
-#
-#         payload = {
-#             'refresh_token': self.__refresh_token,
-#             'client_secret': self.CLIENT_SECRET
-#         }
-#
-#         resp = requests.post(url, json=payload)
-#
-#         self.__session_id = resp.json()['sessionId']
-#         self.__refresh_token = resp.json()['refresh_token']
-#
-#     def _get_ticket_id(self, qr: str) -> str:
-#         """
-#         Get ticker id by info from qr code
-#         :param qr: text from qr code. Example "t=20200727T174700&s=746.00&fn=9285000100206366&i=34929&fp=3951774668&n=1"
-#         :return: Ticket id. Example "5f3bc6b953d5cb4f4e43a06c"
-#         """
-#         url = f'{self.HOST}/v2/ticket'
-#
-#         payload = {
-#             'qr': qr
-#         }
-#         headers = {
-#             'sessionId': self.__session_id
-#         }
-#
-#         resp = requests.post(url, json=payload, headers=headers)
-#
-#         return resp.json()["id"]
-#
-#     def get_ticket(self, qr: str) -> dict:
-#         """
-#         Get JSON ticket
-#         :param qr: text from qr code. Example "t=20200727T174700&s=746.00&fn=9285000100206366&i=34929&fp=3951774668&n=1"
-#         :return: JSON ticket
-#         """
-#         ticket_id = self._get_ticket_id(qr)
-#
-#         url = f'{self.HOST}/v2/tickets/{ticket_id}'
-#
-#         headers = {
-#             'sessionId': self.__session_id,
-#             'Content-Type': 'application/json'
-#         }
-#
-#         resp = requests.get(url, headers=headers)
-#
-#         return resp.json()
-
-
-# if __name__ == '__main__':
-#     client = NalogRu(session_id=SESSION_ID, refresh_token=REFRESH_TOKEN)
-#     qr_code = "t=20200709T2008&s=7273.00&fn=9282440300688488&i=14186&fp=1460060363&n=1"
-#     ticket = client.get_ticket(qr_code)
-#     print(json.dumps(ticket, indent=4, ensure_ascii=False))
-#
-#     # client.refresh_token_function()
-#     # qr_code = "t=20200924T1837&s=349.93&fn=9282440300682838&i=46534&fp=1273019065&n=1"
-#     # ticket = client.get_ticket(qr_code)
-#     # print(json.dumps(ticket, indent=4, ensure_ascii=False))

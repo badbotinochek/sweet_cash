@@ -1,46 +1,45 @@
 
+import uuid
 from datetime import datetime
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
 from db import db
+from api.models.base import BaseModel
 
 
-class SessionModel(db.Model):
+class SessionModel(BaseModel):
     __tablename__ = 'sessions'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
+    updated_at = db.Column(db.DateTime, nullable=True)
+    refresh_token = db.Column(db.String, nullable=False)
     token = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     login_method = db.Column(db.String, nullable=True)
     start = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
-        self.token = self.new_token()
+        self.refresh_token = self._new_refresh_token()
+        self.token = self._new_token()
         self.user_id = kwargs.get('user_id')
         self.login_method = kwargs.get('login_method')
 
-    def get_id(self):
-        return self.id
+    @staticmethod
+    def _new_refresh_token():
+        refresh_token = uuid.uuid4()
+        return refresh_token
 
-    def get_token(self):
-        return self.token
-
-    def new_token(self, expire_time=24):
+    def _new_token(self, expire_time=24):
         expire_delta = timedelta(expire_time)
         token = create_access_token(
             identity=self.id, expires_delta=expire_delta)
         return token
 
-    def create(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self, login_method: str):
-        self.token = self.new_token()
-        self.login_method = login_method
+    def update(self, login_method=None):
+        self.refresh_token = self._new_refresh_token()
+        self.token = self._new_token()
         self.updated_at = datetime.utcnow().isoformat()
+        if login_method is not None:
+            self.login_method = login_method
         db.session.commit()
 
     @classmethod
@@ -51,11 +50,11 @@ class SessionModel(db.Model):
         return result
 
     @classmethod
-    def get(cls, user_id=None, token=None):
+    def get(cls, user_id=None, refresh_token=None):
         if user_id is not None:
             result = cls.query.filter(cls.user_id == user_id).first()
-        elif token is not None:
-            result = cls.query.filter(cls.token == token).first()
+        elif refresh_token is not None:
+            result = cls.query.filter(cls.refresh_token == refresh_token).first()
         else:
             result = None
         return result

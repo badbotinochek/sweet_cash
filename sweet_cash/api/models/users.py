@@ -1,19 +1,18 @@
 
 import bcrypt
-from datetime import datetime
 
 from db import db
+from api.models.base import BaseModel
 
 
-class UserModel(db.Model):
+class UserModel(BaseModel):
     __tablename__ = 'users'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     name = db.Column(db.String(250), nullable=False)
     email = db.Column(db.String(250), nullable=False, unique=True)
     phone = db.Column(db.String, nullable=False)
     password = db.Column(db.String(250), nullable=False)
+    confirmed = db.Column(db.Boolean, nullable=True, default=False)
+    deleted = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, **kwargs):
         self.name = kwargs.get('name')
@@ -21,21 +20,22 @@ class UserModel(db.Model):
         self.phone = kwargs.get('phone')
         self.password = bcrypt.hashpw(kwargs.get('password').encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
+    def update(self, **kwargs):
+        if kwargs.get('name') is not None:
+            self.name = kwargs.get('name')
+        if kwargs.get('email') is not None:
+            self.email = kwargs.get('email')
+        if kwargs.get('phone') is not None:
+            self.phone = kwargs.get('phone')
+        if kwargs.get('confirmed') is not None:
+            self.confirmed = kwargs.get('confirmed')
+        db.session.commit()
+
     def __repr__(self):
         return "<User(name='{}', email='{}', password={}".format(self.name, self.email, self.password)
 
-    def get_id(self):
-        return self.id
-
-    def get_phone(self):
-        return self.phone
-
-    def create(self):
-        db.session.add(self)
-        db.session.commit()
-
     @classmethod
-    def get(cls, user_id: str) -> db.Model:
+    def get(cls, user_id: int) -> db.Model:
         user = cls.query.filter(cls.id == user_id).first()
         return user
 

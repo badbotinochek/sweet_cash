@@ -1,11 +1,10 @@
 
 from db import db
+from api.models.base import BaseModel
 
 
-class TransactionCategory(db.Model):
-    __tablename__ = 'transactions_category'
-    __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer, primary_key=True)
+class TransactionCategory(BaseModel):
+    __tablename__ = 'transactions_categories'
     name = db.Column(db.String, nullable=False)
     parent_category_id = db.Column(db.Integer, nullable=True)
     description = db.Column(db.String(250), nullable=True)
