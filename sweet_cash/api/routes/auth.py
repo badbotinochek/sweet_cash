@@ -53,7 +53,7 @@ def get_token(refresh_token: str,
 def confirm_registration(email: str,
                          code: str,
                          confirm_user=ConfirmUser()):
-    return confirm_user(email=email, confirmation_code=code), 200
+    return confirm_user(email=email, confirmation_code=code), 200  # return html
 
 
 @auth_api.route('/api/v1/auth/code', methods=['GET'])

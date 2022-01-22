@@ -30,7 +30,7 @@ class NalogRuApi(metaclass=Singleton):
     SUCCESS_CODE = [200, 204]
 
     def check_response(self, response, *args):
-        if response.status_code in self.SUCCESS_CODE:
+        if response.status_code not in self.SUCCESS_CODE:
             logger.error(f'NalogRu API error. Response {response}')
             raise error.APIError(f'NalogRu API error {response.status_code} {response.text}')
 
