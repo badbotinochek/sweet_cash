@@ -8,6 +8,7 @@ from config import Config
 from api.models.session import SessionModel
 from api.models.transaction import TransactionModel
 from api.models.receipt import ReceiptModel
+from api.models.event import EventModel
 from api.models.transaction_category import TransactionCategory
 import api.errors as error
 
@@ -158,6 +159,11 @@ def formatting(data) -> dict:
                 "external_id": data.external_id,
                 "transaction_id": data.transaction_id
             }
+        elif type(data) is EventModel:
+                formatted_data = {
+                "id": data.id
+            }
+
         return formatted_data
     except Exception as err:
         logger.error(f'Formatting object {data} error {err}')

@@ -29,6 +29,7 @@ def create_app():
     from api.routes.transaction_categories import transaction_categories_api
     from api.routes.external_auth import external_auth_api
     from api.routes.receipts import receipts_api
+    from api.routes.events import events_api
 
     # db
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(transaction_categories_api)
     app.register_blueprint(external_auth_api)
     app.register_blueprint(receipts_api)
+    app.register_blueprint(events_api)
     app.register_blueprint(error.blueprint)
 
     # Run notification processing

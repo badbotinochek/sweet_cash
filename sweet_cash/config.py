@@ -1,7 +1,7 @@
 class Config:
     SECRET_KEY = '025b376adf584b72888bffe69f90524d'
 
-    DATABASE_URI = 'postgresql://postgres:911911@localhost:5432/postgres'
+    DATABASE_URI = 'postgresql://postgres:12345@localhost:5432/postgres'
     # DATABASE_URI = 'postgresql://postgres:911911@app_pg:5432/postgres'
 
     NALOG_RU_HOST = 'https://irkkt-mobile.nalog.ru:8888'
@@ -20,4 +20,4 @@ class Config:
     SMTP_HOST = 'smtp.yandex.ru'
     SMTP_PORT = 465
     EMAIL_ADDRESS = 'dka45-1p@yandex.ru'
-    EMAIL_PASSWORD = 'gaytdrxsksdonwoh'
+    EMAIL_PASSWORD = 'qbrosrbmvqepucsn'
