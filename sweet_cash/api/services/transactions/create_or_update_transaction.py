@@ -1,7 +1,7 @@
 import logging
 
 from api.models.transaction_category import TransactionCategory
-from api.services.events.get_event_user import GetEventUser
+from api.services.events.get_event_participant import GetEventParticipant
 from api.services.receipts.get_receipt import GetReceipt
 from api.models.transaction import TransactionModel, TransactionType
 from config import Config
@@ -11,7 +11,7 @@ logger = logging.getLogger(name="transactions")
 
 
 class CreateOrUpdateTransaction:
-    event_user = GetEventUser()
+    event_participant = GetEventParticipant()
     receipt = GetReceipt()
 
     def __call__(self, **kwargs) -> TransactionModel:
@@ -43,7 +43,7 @@ class CreateOrUpdateTransaction:
                            f'category {transactions_category_id}')
             raise error.APIValueNotFound(f'Transaction category with id {transactions_category_id} not found')
 
-        self.event_user(event_id=event_id, user_id=user_id)
+        self.event_participant(event_id=event_id, user_id=user_id)
 
         if receipt_id is not None:
             self.receipt(receipt_id=receipt_id, user_id=user_id)

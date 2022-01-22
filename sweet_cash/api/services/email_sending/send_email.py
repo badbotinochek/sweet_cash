@@ -32,9 +32,9 @@ class SendEmail:
             content = f"""\
                     <html>
                       <body>
-                        <p>Привет,<br>
-                           Для завершения регистрации на Sweet Cash перейдите по <br>
-                           <a href="http://127.0.0.1:5000/api/v1/confirm?email={email}&confirmation_code={confirmation_code}">ссылке</a>.
+                        <p>Привет!<br>
+                           Для завершения регистрации на Sweet Cash перейдите по
+                           <a href="http://127.0.0.1:5000/api/v1/auth/confirm?email={email}&code={confirmation_code}">ссылке</a>.
                         </p>
                       </body>
                     </html>
