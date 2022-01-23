@@ -1,15 +1,12 @@
+from flask import request
 import logging
 
-from api.services.events.get_event_user import GetEventUser
 from api.models.event import EventModel
-from config import Config
-import api.errors as error
+from api.services.events.create_participant import CreateEventParticipant
 
 logger = logging.getLogger(name="event")
 
-
 class CreateEvent:
-    event_user = GetEventUser()
 
     def __call__(self, **kwargs) -> EventModel:
         name = kwargs.get("name")
@@ -21,12 +18,26 @@ class CreateEvent:
                            start=start,
                            end=end,
                            description=description)
-
-        if description is not None:
-            event.description = description
+        user_id = getattr(request, "user_id")
 
         event.create()
+        global t
+        t = event.get_id()
+        self._create_manager()
 
-        logger.info(f'User created transaction {id}')
+        logger.info(f'User {user_id} created event {id}')
 
         return event
+
+    def _create_manager(self,  create_participant=CreateEventParticipant()):
+        user_id = getattr(request, "user_id")
+        event_id = t
+        role = "MANAGER"
+        accepted = True
+
+        manager = create_participant(user_id=user_id,
+                                     event_id=event_id,
+                                     role=role,
+                                     accepted=accepted)
+
+        return manager

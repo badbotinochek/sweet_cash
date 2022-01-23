@@ -160,8 +160,13 @@ def formatting(data) -> dict:
                 "transaction_id": data.transaction_id
             }
         elif type(data) is EventModel:
-                formatted_data = {
-                "id": data.id
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "name": data.name,
+                "start": data.start,
+                "end": data.end,
+                "description": data.description
             }
 
         return formatted_data
