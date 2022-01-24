@@ -6,7 +6,9 @@ from api.services.events.create_participant import CreateEventParticipant
 
 logger = logging.getLogger(name="event")
 
+
 class CreateEvent:
+    create_participant = CreateEventParticipant()
 
     def __call__(self, **kwargs) -> EventModel:
         name = kwargs.get("name")
@@ -18,26 +20,16 @@ class CreateEvent:
                            start=start,
                            end=end,
                            description=description)
-        user_id = getattr(request, "user_id")
 
         event.create()
-        global t
-        t = event.get_id()
-        self._create_manager()
+
+        user_id = getattr(request, "user_id")
+
+        self.create_participant(user_id=user_id,
+                                event_id=event.get_id(),
+                                role="MANAGER")
+        # Подтвердить менеджера
 
         logger.info(f'User {user_id} created event {id}')
 
         return event
-
-    def _create_manager(self,  create_participant=CreateEventParticipant()):
-        user_id = getattr(request, "user_id")
-        event_id = t
-        role = "MANAGER"
-        accepted = True
-
-        manager = create_participant(user_id=user_id,
-                                     event_id=event_id,
-                                     role=role,
-                                     accepted=accepted)
-
-        return manager
