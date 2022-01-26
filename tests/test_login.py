@@ -6,8 +6,8 @@ HOST = 'http://127.0.0.1:5000'
 EMAIL = "test1@test.com"
 PHONE = '+79001234567'
 PASSWORD = "1@yAndexru"
-REFRESH_TOKEN = None
-TOKEN = None
+REFRESH_TOKEN = ''
+TOKEN = ''
 
 
 '''
@@ -275,7 +275,6 @@ def test_login_with_invalid_email_format():
         "message": "Invalid email format"
     }
 
-
 '''
 TEST GETTING TOKEN
 '''
@@ -391,4 +390,58 @@ def test_getting_token_with_wrong_refresh_token():
     assert response.json() == {
         "error": "Not found",
         "message": "Token not found"
+    }
+
+
+'''
+TEST CONFIRMATION USER
+'''
+
+
+def test_confirm_registration_success():
+    global REFRESH_TOKEN, TOKEN
+    response = requests.get(
+        HOST + "/api/v1/auth/confirm?email=" + EMAIL + "&code=1234"
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+
+
+def test_confirm_registration_without_required_params():
+    response = requests.get(
+        HOST + "/api/v1/auth/confirm"
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Params ('email', 'code') required",
+        "status": 400
+    }
+
+
+'''
+TEST SENDING CONFIRM CODE
+'''
+
+
+def test_send_code_success():
+    global REFRESH_TOKEN, TOKEN
+    response = requests.get(
+        HOST + "/api/v1/auth/code?email=" + EMAIL
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+
+
+def test_send_code_without_required_params():
+    response = requests.get(
+        HOST + "/api/v1/auth/code"
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.json() == {
+        "error_code": "bad-params",
+        "message": "Params ('email',) required",
+        "status": 400
     }

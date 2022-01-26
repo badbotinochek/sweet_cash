@@ -98,13 +98,26 @@ def query_params(*args, **kwargs):
 
     def decorator(func):
         def wrapper():
+            # Checking for required parameters and types
+            not_founded_required_params = []
+            invalid_types_params = []
+
             for k, v in kwargs.items():
                 parameter = request.args.get(k)
                 if parameter is None and v['required']:
-                    return error.BadParams(f'{k} is required')
+                    not_founded_required_params.append(k)
                 if parameter is not None and type(parameter) is not v['type']:
-                    return error.BadParams(f'Invalid type for {k}')
+                    invalid_types_params.append(k)
+
+            if len(not_founded_required_params) > 0:
+                return error.BadParams(f'Params {*not_founded_required_params,} required')
+
+            if len(invalid_types_params) > 0:
+                return error.BadParams(f'Invalid type for params {*invalid_types_params,}')
+
             params = {a: request.args.get(a) for a in request.args}
+
+            # Converting input parameters into function arguments
             data = clear_data(params, **kwargs)
             return func(*args, **data)
 
