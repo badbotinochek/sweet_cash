@@ -26,7 +26,6 @@ def create_app():
     # import routes
     from api.routes.auth import auth_api
     from api.routes.transactions import transactions_api
-    from api.routes.transaction_categories import transaction_categories_api
     from api.routes.external_auth import external_auth_api
     from api.routes.receipts import receipts_api
 
@@ -44,7 +43,6 @@ def create_app():
 
     app.register_blueprint(auth_api)
     app.register_blueprint(transactions_api)
-    app.register_blueprint(transaction_categories_api)
     app.register_blueprint(external_auth_api)
     app.register_blueprint(receipts_api)
     app.register_blueprint(error.blueprint)

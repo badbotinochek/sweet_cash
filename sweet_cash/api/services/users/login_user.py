@@ -3,7 +3,7 @@ import logging
 from api.api import check_email_format, check_password_format
 from api.models.users import UserModel
 from api.models.session import SessionModel
-from api.services.nalog_ru_sessions.get_nalog_ru_session import GetNalogRuSession
+from api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
 
 import api.errors as error
 
