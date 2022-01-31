@@ -2,9 +2,9 @@ from flask import request
 import logging
 
 from api.models.event import EventModel
-from api.services.events.create_participant import CreateEventParticipant
+from api.services.events.create_event_participant import CreateEventParticipant
 
-logger = logging.getLogger(name="event")
+logger = logging.getLogger(name="events")
 
 
 class CreateEvent:

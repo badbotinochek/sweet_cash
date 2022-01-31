@@ -5,7 +5,7 @@ from api.models.event import EventModel
 logger = logging.getLogger(name="events")
 
 
-class ConfirmEvent:
+class GetEvents:
 
-    def __call__(self, **kwargs) -> EventModel:
+    def __call__(self, **kwargs) -> [EventModel]:
         pass

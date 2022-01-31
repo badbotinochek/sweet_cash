@@ -2,10 +2,11 @@ import logging
 
 from api.models.event_participants import EventParticipantsModel
 
-logger = logging.getLogger(name="event_participant")
+logger = logging.getLogger(name="events")
 
 
-class AddParticipant:
+class CreateEventParticipant:
 
     def __call__(self, **kwargs) -> EventParticipantsModel:
         pass
+
