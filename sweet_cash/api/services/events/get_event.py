@@ -3,7 +3,7 @@ import logging
 from api.models.event import EventModel
 import api.errors as error
 
-logger = logging.getLogger(name="transactions")
+logger = logging.getLogger(name="events")
 
 
 class GetEvent:

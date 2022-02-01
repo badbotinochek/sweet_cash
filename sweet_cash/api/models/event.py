@@ -22,3 +22,6 @@ class EventModel(BaseModel):
     def get_by_user(cls, event_id: int, user_id: int):
         event = cls.query.filter(cls.id == event_id, cls.user_id == user_id).first()
         return event
+
+    def get_id(self):
+        return self.id
