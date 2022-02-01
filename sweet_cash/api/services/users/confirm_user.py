@@ -18,10 +18,10 @@ class ConfirmUser:
             logger.warning(f'User with email {email} is trying to confirm registration')
             raise error.APIValueNotFound(f'User with email {email} not found')
 
-        try:
-            decode_token(encoded_token=confirmation_code)
-        except Exception as e:
-            return open('templates/fail_confirmation.html', 'r').read()
+        # try:
+        #     decode_token(encoded_token=confirmation_code)
+        # except Exception as e:
+        #     return open('templates/fail_confirmation.html', 'r').read()
 
         user.update(confirmed=True)
 
