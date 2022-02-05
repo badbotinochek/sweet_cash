@@ -1,6 +1,9 @@
 
+from datetime import datetime
+
 from db import db
 from api.models.base import BaseModel
+from api.models.event_participants import EventParticipantsModel
 
 
 class EventModel(BaseModel):
@@ -18,10 +21,27 @@ class EventModel(BaseModel):
         self.start = kwargs.get('start')
         self.end = kwargs.get('end')
 
+    def update(self, **kwargs):
+        self.updated_at = datetime.utcnow().isoformat()
+        self.name = kwargs.get('name')
+        self.start = kwargs.get('start')
+        self.end = kwargs.get('end')
+        self.description = kwargs.get('description')
+        db.session.commit()
+
     @classmethod
-    def get_by_user(cls, event_id: int, user_id: int):
-        event = cls.query.filter(cls.id == event_id, cls.user_id == user_id).first()
+    def get_by_id(cls, event_id: int):
+        event = cls.query.filter(cls.id == event_id).first()
         return event
+
+    @classmethod
+    def get_by_ids(cls, event_ids: [int]):
+        events = cls.query.filter(cls.id.in_(event_ids)).all()
+        return events
 
     def get_id(self):
         return self.id
+
+    def get_participants(self):
+        participants = EventParticipantsModel.get_by_event(event_id=self.id)
+        return participants

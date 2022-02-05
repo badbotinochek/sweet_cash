@@ -1,6 +1,7 @@
 import logging
 
 from api.models.users import UserModel
+import api.errors as error
 
 logger = logging.getLogger(name="auth")
 
@@ -8,4 +9,11 @@ logger = logging.getLogger(name="auth")
 class GetUser:
 
     def __call__(self, user_id: int) -> UserModel:
-        return UserModel.get(user_id=user_id)
+
+        user = UserModel.get(user_id=user_id)
+
+        if user is None:
+            logger.warning(f'User with id {user_id} not found')
+            raise error.APIValueNotFound(f'User {user_id} not found')
+
+        return user

@@ -18,9 +18,6 @@ class VerifyOtpForNalogRu:
 
         user = self.get_user(user_id=user_id)
 
-        if user is None:
-            raise error.APIValueNotFound('User not found')
-
         phone = user.phone
 
         if not check_phone_format(phone):

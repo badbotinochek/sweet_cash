@@ -3,12 +3,14 @@ from flask import request, jsonify
 import re
 from flask_jwt_extended import jwt_required
 import logging
+from datetime import datetime
 
 from config import Config
 from api.models.session import SessionModel
 from api.models.transaction import TransactionModel
 from api.models.receipt import ReceiptModel
 from api.models.event import EventModel
+from api.models.event_participants import EventParticipantsModel
 from api.models.transaction_category import TransactionCategory
 import api.errors as error
 
@@ -147,6 +149,42 @@ def check_password_format(password: str):
     return result
 
 
+def str2datetime(datetime_str: str):
+    try:
+        return datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%SZ')
+    except Exception as e:
+        raise error.APIParamError(str(e))
+
+
+def event_participants_decode(data: list) -> dict:
+    total = len(data)
+    user_role = None
+    user_accepted = False
+    participants = []
+
+    # Get user role and status
+    for participant in data:
+        if participant.user_id == getattr(request, "user_id"):
+            user_role = participant.role.value
+            user_accepted = participant.accepted
+
+    for participant in data:
+        if not user_accepted:
+            # Add users participant and managers participant for not accepted user
+            if participant.role == 'Manager' or participant.user_id == getattr(request, "user_id"):
+                participants.append(formatting(participant))
+        else:
+            if participant not in participants:
+                participants.append(formatting(participant))
+
+    return {
+        "total": total,
+        "your_role": user_role,
+        "is_accepted": user_accepted,
+        "participants": participants
+    }
+
+
 def formatting(data) -> dict:
     try:
         formatted_data = {}
@@ -176,10 +214,21 @@ def formatting(data) -> dict:
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
+                "updated_at": data.updated_at,
                 "name": data.name,
                 "start": data.start,
                 "end": data.end,
-                "description": data.description
+                "description": data.description,
+                "participants_info": event_participants_decode(data.get_participants())
+            }
+        elif type(data) is EventParticipantsModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "user_id": data.user_id,
+                "role": data.role.value,
+                "accepted": data.accepted
             }
 
         return formatted_data
