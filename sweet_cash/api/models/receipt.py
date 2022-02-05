@@ -17,6 +17,6 @@ class ReceiptModel(BaseModel):
         self.data = kwargs.get('data')
 
     @classmethod
-    def get_by_user(cls, receipt_id: int, user_id: int):
-        receipt = cls.query.filter(cls.id == receipt_id, cls.user_id == user_id).first()
+    def get_by_external_id(cls, external_id: str, user_id: int):
+        receipt = cls.query.filter(cls.external_id == external_id, cls.user_id == user_id).first()
         return receipt

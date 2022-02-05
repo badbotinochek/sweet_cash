@@ -2,7 +2,7 @@ import logging
 
 from api.models.nalog_ru_session import NalogRuSessionModel
 
-logger = logging.getLogger(name="auth")
+logger = logging.getLogger(name="nalog_ru")
 
 
 class CreateOrUpdateNalogRuSession:

@@ -3,12 +3,14 @@ from flask import request, jsonify
 import re
 from flask_jwt_extended import jwt_required
 import logging
+from datetime import datetime
 
 from config import Config
 from api.models.session import SessionModel
 from api.models.transaction import TransactionModel
 from api.models.receipt import ReceiptModel
 from api.models.event import EventModel
+from api.models.event_participants import EventParticipantsModel
 from api.models.transaction_category import TransactionCategory
 import api.errors as error
 
@@ -99,13 +101,26 @@ def query_params(*args, **kwargs):
 
     def decorator(func):
         def wrapper():
+            # Checking for required parameters and types
+            not_founded_required_params = []
+            invalid_types_params = []
+
             for k, v in kwargs.items():
                 parameter = request.args.get(k)
                 if parameter is None and v['required']:
-                    return error.BadParams(f'{k} is required')
+                    not_founded_required_params.append(k)
                 if parameter is not None and type(parameter) is not v['type']:
-                    return error.BadParams(f'Invalid type for {k}')
+                    invalid_types_params.append(k)
+
+            if len(not_founded_required_params) > 0:
+                return error.BadParams(f'Params {*not_founded_required_params,} required')
+
+            if len(invalid_types_params) > 0:
+                return error.BadParams(f'Invalid type for params {*invalid_types_params,}')
+
             params = {a: request.args.get(a) for a in request.args}
+
+            # Converting input parameters into function arguments
             data = clear_data(params, **kwargs)
             return func(*args, **data)
 
@@ -132,6 +147,42 @@ def check_password_format(password: str):
     regex = Config.PASSWORD_REGEX
     result = re.fullmatch(regex, password)
     return result
+
+
+def str2datetime(datetime_str: str):
+    try:
+        return datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%SZ')
+    except Exception as e:
+        raise error.APIParamError(str(e))
+
+
+def event_participants_decode(data: list) -> dict:
+    total = len(data)
+    user_role = None
+    user_accepted = False
+    participants = []
+
+    # Get user role and status
+    for participant in data:
+        if participant.user_id == getattr(request, "user_id"):
+            user_role = participant.role.value
+            user_accepted = participant.accepted
+
+    for participant in data:
+        if not user_accepted:
+            # Add users participant and managers participant for not accepted user
+            if participant.role == 'Manager' or participant.user_id == getattr(request, "user_id"):
+                participants.append(formatting(participant))
+        else:
+            if participant not in participants:
+                participants.append(formatting(participant))
+
+    return {
+        "total": total,
+        "your_role": user_role,
+        "is_accepted": user_accepted,
+        "participants": participants
+    }
 
 
 def formatting(data) -> dict:
@@ -163,10 +214,21 @@ def formatting(data) -> dict:
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
+                "updated_at": data.updated_at,
                 "name": data.name,
                 "start": data.start,
                 "end": data.end,
-                "description": data.description
+                "description": data.description,
+                "participants_info": event_participants_decode(data.get_participants())
+            }
+        elif type(data) is EventParticipantsModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "user_id": data.user_id,
+                "role": data.role.value,
+                "accepted": data.accepted
             }
 
         return formatted_data
