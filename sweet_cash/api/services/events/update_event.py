@@ -22,7 +22,7 @@ class UpdateEvent:
         end = kwargs.get("end")
         description = kwargs.get("description")
 
-        if start is not None or end is not None:
+        if start is not None and end is not None:
             if str2datetime(start) > str2datetime(end):
                 raise error.APIParamError(f'Start {start} must be less than End {end}')
 

@@ -171,7 +171,7 @@ def event_participants_decode(data: list) -> dict:
     for participant in data:
         if not user_accepted:
             # Add users participant and managers participant for not accepted user
-            if participant.role == 'Manager' or participant.user_id == getattr(request, "user_id"):
+            if participant.role.value == 'Manager' or participant.user_id == getattr(request, "user_id"):
                 participants.append(formatting(participant))
         else:
             if participant not in participants:

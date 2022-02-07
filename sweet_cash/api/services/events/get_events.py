@@ -4,7 +4,6 @@ from api.services.events.get_event_participant import GetEventParticipant
 from api.models.event import EventModel
 import api.errors as error
 
-
 logger = logging.getLogger(name="events")
 
 
@@ -24,7 +23,10 @@ class GetEvents:
         split_list = ids.split(',')
 
         for elem in split_list:
-            ids_list.append(int(elem))
+            try:
+                ids_list.append(int(elem))
+            except ValueError:
+                continue
 
         return ids_list
 
