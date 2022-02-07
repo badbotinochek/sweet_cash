@@ -38,7 +38,7 @@ def create_event(name: str,
 @events_api.route('/api/v1/events', methods=['GET'])
 @auth()
 @query_params(ids=features(type=str))
-def get_events(ids,
+def get_events(ids=None,
                get_events=GetEvents()):
     events = get_events(user_id=getattr(request, "user_id"),
                         event_ids=ids)
