@@ -188,7 +188,7 @@ def event_participants_decode(data: list) -> dict:
 def formatting(data) -> dict:
     try:
         formatted_data = {}
-        if type(data) is TransactionModel:
+        if isinstance(data, TransactionModel):
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
@@ -203,14 +203,14 @@ def formatting(data) -> dict:
                 "receipt_id": data.receipt_id,
                 "description": data.description
             }
-        elif type(data) is ReceiptModel:
+        elif isinstance(data, ReceiptModel):
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
                 "external_id": data.external_id,
                 "transaction_id": data.transaction_id
             }
-        elif type(data) is EventModel:
+        elif isinstance(data, EventModel):
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
@@ -221,14 +221,14 @@ def formatting(data) -> dict:
                 "description": data.description,
                 "participants_info": event_participants_decode(data.get_participants())
             }
-        elif type(data) is EventParticipantsModel:
+        elif isinstance(data, EventParticipantsModel):
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,
                 "updated_at": data.updated_at,
                 "user_id": data.user_id,
                 "role": data.role.value,
-                "accepted": data.accepted
+                "is_accepted": data.accepted
             }
 
         return formatted_data

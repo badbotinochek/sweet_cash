@@ -7,7 +7,7 @@ EMAIL = "test1@test.com"
 PASSWORD = "1@yAndexru"
 
 REFRESH_TOKEN = requests.post(
-    HOST + "/api/v1/login",
+    HOST + "/api/v1/auth/login",
     json={
         "email": EMAIL,
         "password": PASSWORD
@@ -16,7 +16,7 @@ REFRESH_TOKEN = requests.post(
 ).json()["refresh_token"]
 
 TOKEN = requests.post(
-    HOST + "/api/v1/token",
+    HOST + "/api/v1/auth/token",
     json={
         "refresh_token": REFRESH_TOKEN
     },
