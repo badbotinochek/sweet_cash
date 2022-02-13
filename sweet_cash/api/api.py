@@ -11,7 +11,7 @@ from api.models.transaction import TransactionModel
 from api.models.receipt import ReceiptModel
 from api.models.event import EventModel
 from api.models.event_participants import EventParticipantsModel
-from api.models.transaction_category import TransactionCategory
+from api.models.transaction_category import TransactionCategoryModel
 import api.errors as error
 
 
@@ -197,7 +197,7 @@ def formatting(data) -> dict:
                 "user_id": data.user_id,
                 "event_id": data.event_id,
                 "type": data.type.value,
-                "category": TransactionCategory.get_name(data.category),
+                "category": TransactionCategoryModel.get_name(data.category),
                 "amount": data.amount,
                 "transaction_date": data.transaction_date,
                 "receipt_id": data.receipt_id,
@@ -230,7 +230,15 @@ def formatting(data) -> dict:
                 "role": data.role.value,
                 "accepted": data.accepted
             }
-
+        elif type(data) is TransactionCategoryModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "name": data.name,
+                "parent_category_id": data.parent_category_id,
+                "description": data.description,
+                
+            }
         return formatted_data
     except Exception as err:
         logger.error(f'Formatting object {data} error {err}')

@@ -6,6 +6,7 @@ from api.services.transactions.create_or_update_transaction import CreateOrUpdat
 from api.services.transactions.get_transaction import GetTransaction
 from api.services.transactions.get_transactions import GetTransactions
 from api.services.transactions.delete_transaction import DeleteTransaction
+from api.services.transactions.get_categories import GetCategories
 
 logger = logging.getLogger(name="transactions")
 
@@ -117,3 +118,11 @@ def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction
     result = delete_transaction(user_id=getattr(request, "user_id"),
                                 transaction_id=transaction_id)
     return SuccessResponse(f'{result} transactions deleted')
+
+
+@transactions_api.route('/api/v1/transactions/categories', methods=['GET'])
+@auth()
+def get_categories(get_categories=GetCategories()):
+    categories = get_categories(user_id=getattr(request, "user_id"))
+    result = [formatting(item) for item in categories]
+    return SuccessResponse(result)
