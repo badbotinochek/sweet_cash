@@ -237,7 +237,6 @@ def formatting(data) -> dict:
                 "name": data.name,
                 "parent_category_id": data.parent_category_id,
                 "description": data.description,
-                
             }
         return formatted_data
     except Exception as err:

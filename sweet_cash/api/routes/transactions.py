@@ -124,5 +124,4 @@ def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction
 @auth()
 def get_categories(get_categories=GetCategories()):
     categories = get_categories(user_id=getattr(request, "user_id"))
-    result = [formatting(item) for item in categories]
-    return SuccessResponse(result)
+    return SuccessResponse(categories)

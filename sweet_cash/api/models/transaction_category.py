@@ -19,7 +19,7 @@ class TransactionCategoryModel(BaseModel):
         return self.id
 
     @classmethod
-    def get(cls, category_id: int):
+    def get_by_id(cls, category_id: int):
         transaction_category = cls.query.filter(cls.id == category_id).first()
         return transaction_category
 
@@ -31,6 +31,6 @@ class TransactionCategoryModel(BaseModel):
         return transaction_category
 
     @classmethod
-    def get_transaction_categories(cls):
-        query = cls.query.filter(cls.deleted == None)
+    def get(cls):
+        query = cls.query.filter(cls.deleted == None).all()
         return query
