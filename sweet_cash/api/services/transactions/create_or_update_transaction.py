@@ -1,6 +1,6 @@
 import logging
 
-from api.models.transaction_category import TransactionCategory
+from api.models.transaction_category import TransactionCategoryModel
 from api.services.events.get_event_participant import GetEventParticipant
 from api.services.receipts.get_receipt import GetReceipt
 from api.models.transaction import TransactionModel, TransactionType
@@ -37,7 +37,7 @@ class CreateOrUpdateTransaction:
             raise error.APIParamError(f'Invalid transaction type {transactions_type}')
 
         # TODO Проверять категорию через сервис
-        transactions_category = TransactionCategory.get(category_id=transactions_category_id)
+        transactions_category = TransactionCategoryModel.get(category_id=transactions_category_id)
         if transactions_category is None:
             logger.warning(f'User {user_id} is trying to create transaction with a non-existent'
                            f'category {transactions_category_id}')
