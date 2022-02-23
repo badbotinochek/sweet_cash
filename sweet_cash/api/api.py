@@ -230,6 +230,16 @@ def formatting(data) -> dict:
                 "role": data.role.value,
                 "is_accepted": data.accepted
             }
+        elif type(data) is TransactionCategoryModel:
+            formatted_data = {
+                "id": data.id,
+                "created_at": data.created_at,
+                "name": data.name,
+                "parent_category_id": data.parent_category_id,
+                "description": data.description,
+            }
+            if hasattr(data, 'sub_categories'):
+                formatted_data["sub_categories"] = [formatting(item) for item in data.sub_categories]
 
         return formatted_data
     except Exception as err:
