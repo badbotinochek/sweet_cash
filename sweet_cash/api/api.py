@@ -11,7 +11,7 @@ from api.models.transaction import TransactionModel
 from api.models.receipt import ReceiptModel
 from api.models.event import EventModel
 from api.models.event_participants import EventParticipantsModel
-from api.models.transaction_category import TransactionCategory
+from api.models.transaction_category import TransactionCategoryModel
 import api.errors as error
 
 
@@ -197,7 +197,7 @@ def formatting(data) -> dict:
                 "user_id": data.user_id,
                 "event_id": data.event_id,
                 "type": data.type.value,
-                "category": TransactionCategory.get_name(data.category),
+                "category": TransactionCategoryModel.get_name(data.category),
                 "amount": data.amount,
                 "transaction_date": data.transaction_date,
                 "receipt_id": data.receipt_id,

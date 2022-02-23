@@ -3,7 +3,7 @@ from db import db
 from api.models.base import BaseModel
 
 
-class TransactionCategory(BaseModel):
+class TransactionCategoryModel(BaseModel):
     __tablename__ = 'transactions_categories'
     name = db.Column(db.String, nullable=False)
     parent_category_id = db.Column(db.Integer, nullable=True)
@@ -19,7 +19,7 @@ class TransactionCategory(BaseModel):
         return self.id
 
     @classmethod
-    def get(cls, category_id: int):
+    def get_by_id(cls, category_id: int):
         transaction_category = cls.query.filter(cls.id == category_id).first()
         return transaction_category
 
@@ -31,10 +31,6 @@ class TransactionCategory(BaseModel):
         return transaction_category
 
     @classmethod
-    def get_transaction_categories(cls, offset=0, limit=100):
-        query = cls.query.filter(cls.deleted == None)
-        if limit:
-            query = query.limit(limit)
-        if offset:
-            query = query.offset(limit * offset)
+    def get(cls):
+        query = cls.query.filter(cls.deleted == None).order_by(cls.id.desc()).all()
         return query
