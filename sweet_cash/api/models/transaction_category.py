@@ -32,5 +32,5 @@ class TransactionCategoryModel(BaseModel):
 
     @classmethod
     def get(cls):
-        query = cls.query.filter(cls.deleted == None).all()
+        query = cls.query.filter(cls.deleted == None).order_by(cls.id.desc()).all()
         return query

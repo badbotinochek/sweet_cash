@@ -20,7 +20,7 @@ def test_register_success():
         HOST + "/api/v1/auth/register",
         json={
             "name": EMAIL,
-            "email": EMAIL,
+            "email": "test0@test.com",
             "phone": PHONE,
             "password": PASSWORD
         },

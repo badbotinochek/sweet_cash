@@ -8,6 +8,7 @@ from api.services.transactions.get_transactions import GetTransactions
 from api.services.transactions.delete_transaction import DeleteTransaction
 from api.services.transactions.get_categories import GetCategories
 
+
 logger = logging.getLogger(name="transactions")
 
 transactions_api = Blueprint('transactions', __name__)
@@ -124,4 +125,5 @@ def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction
 @auth()
 def get_categories(get_categories=GetCategories()):
     categories = get_categories(user_id=getattr(request, "user_id"))
-    return SuccessResponse(categories)
+    result = [formatting(item) for item in categories]
+    return SuccessResponse(result)
