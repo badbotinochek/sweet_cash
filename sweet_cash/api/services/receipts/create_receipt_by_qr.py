@@ -3,7 +3,7 @@ import logging
 
 from api.integrations.nalog_ru import NalogRuApi
 from api.models.receipt import ReceiptModel
-from api.services.transactions.create_or_update_transaction import CreateOrUpdateTransaction
+from api.services.transactions.create_transaction import CreateTransaction
 from api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
 import api.errors as error
 
@@ -64,7 +64,7 @@ class CreateReceiptByQr:
     def _save_transaction_by_receipt(self, user_id: int,
                                      receipt_id: str,
                                      receipt_data: dict,
-                                     create_or_update_transaction=CreateOrUpdateTransaction()):
+                                     create_or_update_transaction=CreateTransaction()):
         if "operation" not in receipt_data and "dateTime" not in receipt_data:
             logger.error(f'Error saving transaction for receipt {receipt_id} with receipt '
                          f'data {receipt_data}')

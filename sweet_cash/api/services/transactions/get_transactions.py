@@ -1,16 +1,43 @@
 import logging
 
 from api.models.transaction import TransactionModel
+from api.services.events.get_event_participant import GetEventParticipant
+from api.api import str2datetime
+import api.errors as error
 
 logger = logging.getLogger(name="transactions")
 
 
-class GetTransactions:
+class GetAllTransactions:
+    event_participant = GetEventParticipant()
 
-    def __call__(self, user_id: int, limit=100, offset=0) -> [TransactionModel]:
-        transactions = TransactionModel.get_transactions(user_id=int(user_id),
-                                                         offset=int(offset),
-                                                         limit=int(limit))
+    def __call__(self, **kwargs) -> [TransactionModel]:
+        user_id = kwargs.get("user_id")
+        event_id = kwargs.get("event_id")
+        start = kwargs.get("start")
+        end = kwargs.get("end")
+        limit = kwargs.get("limit")
+        offset = kwargs.get("offset")
+
+        if start is not None and end is not None:
+            if str2datetime(start) > str2datetime(end):
+                raise error.APIParamError(f'Start {start} must be less than End {end}')
+
+        # Checking that user is the event manager
+        participant = self.event_participant(event_id=event_id, user_id=user_id, accepted=True)
+
+        if participant.role == 'Partner':
+            transactions = TransactionModel.get_transactions_by_user_id(user_id=user_id,
+                                                                        start=start,
+                                                                        end=end,
+                                                                        limit=int(limit),
+                                                                        offset=int(offset))
+        else:
+            transactions = TransactionModel.get_transactions_by_event_id(event_id=event_id,
+                                                                         start=start,
+                                                                         end=end,
+                                                                         limit=int(limit),
+                                                                         offset=int(offset))
 
         transactions = [t for t in transactions]
 
