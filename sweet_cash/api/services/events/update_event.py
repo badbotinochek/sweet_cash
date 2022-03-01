@@ -3,7 +3,6 @@ import logging
 from api.services.events.get_events import GetEvents
 from api.services.events.get_event_participant import GetEventParticipant
 from api.models.event import EventModel
-from api.models.event_participants import EventParticipantRole
 from api.api import str2datetime
 import api.errors as error
 

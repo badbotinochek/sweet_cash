@@ -10,19 +10,17 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class CreateOrUpdateTransaction:
+class CreateTransaction:
     event_participant = GetEventParticipant()
     receipt = GetReceipt()
 
     def __call__(self, **kwargs) -> TransactionModel:
-        transaction_id = kwargs.get("transaction_id")
-        number = kwargs.get("number")
-        event_id = kwargs.get("event_id")
         user_id = kwargs.get("user_id")
+        event_id = kwargs.get("event_id")
+        transaction_date = kwargs.get("transaction_date")
         transactions_type = kwargs.get("type")
         transactions_category_id = kwargs.get("category_id")
         amount = kwargs.get("amount")
-        transaction_date = kwargs.get("transaction_date")
         receipt_id = kwargs.get("receipt_id")
         description = kwargs.get("description")
 
@@ -37,53 +35,28 @@ class CreateOrUpdateTransaction:
             raise error.APIParamError(f'Invalid transaction type {transactions_type}')
 
         # TODO Проверять категорию через сервис
-        transactions_category = TransactionCategoryModel.get(category_id=transactions_category_id)
+        transactions_category = TransactionCategoryModel.get_by_id(category_id=transactions_category_id)
         if transactions_category is None:
             logger.warning(f'User {user_id} is trying to create transaction with a non-existent'
                            f'category {transactions_category_id}')
             raise error.APIValueNotFound(f'Transaction category with id {transactions_category_id} not found')
 
-        self.event_participant(event_id=event_id, user_id=user_id)
+        self.event_participant(event_id=event_id, user_id=user_id, accepted=True)
 
         if receipt_id is not None:
             self.receipt(receipt_id=receipt_id, user_id=user_id)
 
-        if transaction_id is not None:
-
-            transaction = TransactionModel.get_by_user(transaction_id=transaction_id, user_id=int(user_id))
-
-            if transaction is None:
-                logger.warning(f'User {user_id} is trying to update a non-existent transaction {transaction_id}')
-                raise error.APIValueNotFound(f'Transaction {transaction_id} not found')
-
-            transaction.update(number=number,
-                               event_id=event_id,
-                               type=TransactionType(transactions_type),
-                               category_id=transactions_category_id,
-                               amount=amount,
-                               transaction_date=transaction_date,
-                               receipt_id=receipt_id,
-                               description=description)
-
-            logger.info(f'User {user_id} updated transaction {transaction_id}')
-
-            return transaction
-
-        transaction = TransactionModel(number=number,
+        transaction = TransactionModel(user_id=user_id,
                                        event_id=event_id,
-                                       user_id=user_id,
+                                       transaction_date=transaction_date,
                                        type=TransactionType(transactions_type),
                                        category=transactions_category_id,
                                        amount=amount,
-                                       transaction_date=transaction_date,
-                                       description=description,
-                                       receipt_id=receipt_id)
-
-        if description is not None:
-            transaction.description = description
+                                       receipt_id=receipt_id,
+                                       description=description)
 
         transaction.create()
 
-        logger.info(f'User {user_id} created transaction {transaction_id}')
+        logger.info(f'User {user_id} created transaction {transaction.id}')
 
         return transaction

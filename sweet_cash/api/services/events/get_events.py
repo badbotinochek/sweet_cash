@@ -2,6 +2,7 @@ import logging
 
 from api.services.events.get_event_participant import GetEventParticipant
 from api.models.event import EventModel
+from api.api import ids2list
 import api.errors as error
 
 logger = logging.getLogger(name="events")
@@ -10,29 +11,9 @@ logger = logging.getLogger(name="events")
 class GetEvents:
     event_participant = GetEventParticipant()
 
-    @staticmethod
-    def _ids2list(ids):
-        if type(ids) is list:
-            return ids
-
-        ids_list = []
-
-        if ids is None:
-            return ids_list
-
-        split_list = ids.split(',')
-
-        for elem in split_list:
-            try:
-                ids_list.append(int(elem))
-            except ValueError:
-                continue
-
-        return ids_list
-
     def __call__(self, **kwargs) -> [EventModel]:
         user_id = kwargs.get("user_id")
-        event_ids = self._ids2list(kwargs.get("event_ids"))
+        event_ids = ids2list(kwargs.get("event_ids"))
 
         events = []
         for event_id in event_ids:
