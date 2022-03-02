@@ -3,6 +3,11 @@ class Config:
 
     DATABASE_URI = ''
 
+    REDIS_HOST = 'app_redis'
+    REDIS_PORT = 6379
+    REDIS_DB = 0
+    REDIS_PASSWORD = ''
+
     NALOG_RU_HOST = 'https://irkkt-mobile.nalog.ru:8888'
     NALOG_RU_CLIENT_SECRET = ''
     NALOG_RU_OS = 'Android'
@@ -20,3 +25,10 @@ class Config:
     SMTP_PORT = 465
     EMAIL_ADDRESS = ''
     EMAIL_PASSWORD = ''
+
+    JWT_EXPIRE_TIME = 24
+
+    DEBUG = True
+
+    EVENT_PROCESSORS = ['Processor-1']
+    EVENT_LISTENING_PERIOD_IN_SECONDS = 10
