@@ -12,7 +12,7 @@ from config import Config
 logger = logging.getLogger(name="email sending")
 
 
-class SendEmail:
+class SendEmail(object):
 
     def __call__(self, email: str):
         try:

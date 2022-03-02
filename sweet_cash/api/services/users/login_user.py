@@ -10,7 +10,7 @@ import api.errors as error
 logger = logging.getLogger(name="auth")
 
 
-class LoginUser:
+class LoginUser(object):
 
     def __call__(self, email: str, password: str, login_method: str) -> dict:
         if not check_email_format(email):

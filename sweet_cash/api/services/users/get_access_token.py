@@ -1,13 +1,12 @@
 import logging
 
 from api.models.session import SessionModel
-
 import api.errors as error
 
 logger = logging.getLogger(name="auth")
 
 
-class GetAccessToken:
+class GetAccessToken(object):
 
     def __call__(self, refresh_token: str) -> dict:
         session = SessionModel.get(refresh_token=refresh_token)

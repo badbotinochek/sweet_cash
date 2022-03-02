@@ -13,10 +13,10 @@ from config import Config
 logger = logging.getLogger(name="events")
 
 
-class UpdateTransaction:
+class UpdateTransaction(object):
     get_transactions = GetTransactions()
-    event_participant = GetEventParticipant()
-    receipt = GetReceipt()
+    get_event_participant = GetEventParticipant()
+    get_receipt = GetReceipt()
 
     def __call__(self, **kwargs) -> TransactionModel:
         user_id = kwargs.get("user_id")
@@ -46,14 +46,14 @@ class UpdateTransaction:
             raise error.APIValueNotFound(f'Transaction category with id {transactions_category_id} not found')
 
         if receipt_id is not None:
-            self.receipt(receipt_id=receipt_id, user_id=user_id)
+            self.get_receipt(receipt_id=receipt_id, user_id=user_id)
 
         # Get transaction
         transaction = self.get_transactions(user_id=user_id, transaction_ids=[transaction_id])[0]
 
         if transaction.user_id != user_id:
             # Checking that user is a participant in event
-            participant = self.event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
+            participant = self.get_event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
             if participant.role != EventParticipantRole.MANAGER:
                 logger.warning(f'User {user_id} is trying to update a unavailable transaction {transaction_id}')
                 raise error.APIConflict(f'Updating a transaction {transaction_id} unavailable for user {user_id}')

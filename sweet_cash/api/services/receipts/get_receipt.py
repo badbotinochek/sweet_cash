@@ -6,7 +6,7 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class GetReceipt:
+class GetReceipt(object):
 
     def __call__(self, user_id: int, receipt_id: int) -> ReceiptModel:
         receipt = ReceiptModel.get_by_user(receipt_id=receipt_id, user_id=int(user_id))

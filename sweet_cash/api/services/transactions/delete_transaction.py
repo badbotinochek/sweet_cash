@@ -9,9 +9,9 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class DeleteTransaction:
+class DeleteTransaction(object):
     get_transactions = GetTransactions()
-    event_participant = GetEventParticipant()
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, user_id: int, transaction_id: int) -> int:
         # Get transaction
@@ -19,7 +19,7 @@ class DeleteTransaction:
 
         if transaction.user_id != user_id:
             # Checking that user is a participant in event
-            participant = self.event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
+            participant = self.get_event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
             if participant.role != EventParticipantRole.MANAGER:
                 logger.warning(f'User {user_id} is trying to update a unavailable transaction {transaction_id}')
                 raise error.APIConflict(f'Deleting a transaction {transaction_id} unavailable for user {user_id}')

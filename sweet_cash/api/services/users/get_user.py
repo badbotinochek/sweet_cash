@@ -6,7 +6,7 @@ import api.errors as error
 logger = logging.getLogger(name="auth")
 
 
-class GetUser:
+class GetUser(object):
 
     def __call__(self, user_id: int) -> UserModel:
 

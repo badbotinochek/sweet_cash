@@ -7,7 +7,7 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class GetEventsByFilter:
+class GetEventsByFilter(object):
 
     @staticmethod
     def _roles2list(roles: str):

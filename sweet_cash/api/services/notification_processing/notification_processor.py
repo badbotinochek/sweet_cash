@@ -1,10 +1,11 @@
 
 import threading
 import time
+from config import Config
 
 
 class NotificationProcessor(threading.Thread):
-    time_to_wait = 10  # TODO в сonfig
+    time_to_wait = Config.EVENT_LISTENING_PERIOD_IN_SECONDS
 
     def __init__(self, name: str, q):
         threading.Thread.__init__(self, name=name, daemon=True)

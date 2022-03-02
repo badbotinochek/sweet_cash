@@ -9,8 +9,8 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class GetTransactions:
-    event_participant = GetEventParticipant()
+class GetTransactions(object):
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, **kwargs) -> [TransactionModel]:
         user_id = kwargs.get("user_id")
@@ -27,7 +27,7 @@ class GetTransactions:
 
             if transaction.user_id != user_id:
                 # Checking that user is a participant in event
-                participant = self.event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
+                participant = self.get_event_participant(event_id=transaction.event_id, user_id=user_id, accepted=True)
                 if participant.role == EventParticipantRole.PARTNER:
                     logger.warning(f'User {user_id} is trying to get a unavailable transaction {transaction_id}')
                     raise error.APIConflict(f'Transaction {transaction_id} unavailable for user {user_id}')
