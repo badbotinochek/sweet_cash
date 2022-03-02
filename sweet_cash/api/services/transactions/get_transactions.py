@@ -8,8 +8,8 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class GetAllTransactions:
-    event_participant = GetEventParticipant()
+class GetAllTransactions(object):
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, **kwargs) -> [TransactionModel]:
         user_id = kwargs.get("user_id")
@@ -24,7 +24,7 @@ class GetAllTransactions:
                 raise error.APIParamError(f'Start {start} must be less than End {end}')
 
         # Checking that user is the event manager
-        participant = self.event_participant(event_id=event_id, user_id=user_id, accepted=True)
+        participant = self.get_event_participant(event_id=event_id, user_id=user_id, accepted=True)
 
         if participant.role == 'Partner':
             transactions = TransactionModel.get_transactions_by_user_id(user_id=user_id,

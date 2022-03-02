@@ -19,6 +19,7 @@ services:
             - 5000:5000
         depends_on:
             - app_pg
+            - app_redis
 
     app_pg:
         image: postgres:latest
@@ -31,6 +32,13 @@ services:
             - POSTGRES_PASSWORD=911911
         volumes:
             - postgres_data:/var/lib/postgresql/data/
+
+    app_redis:
+        image: redis
+        container_name: sweet_cash-redis
+        command: redis-server --requirepass 911911
+        ports:
+            - 6379:6379
 
 volumes:
   postgres_data:

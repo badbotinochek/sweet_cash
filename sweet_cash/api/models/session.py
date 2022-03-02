@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
+from config import Config
 
 from db import db
 from api.models.base import BaseModel
@@ -25,10 +26,10 @@ class SessionModel(BaseModel):
 
     @staticmethod
     def _new_refresh_token():
-        refresh_token = uuid.uuid4()
+        refresh_token = str(uuid.uuid4())
         return refresh_token
 
-    def _new_token(self, expire_time=24):
+    def _new_token(self, expire_time=Config.JWT_EXPIRE_TIME):
         expire_delta = timedelta(expire_time)
         token = create_access_token(
             identity=self.id, expires_delta=expire_delta)

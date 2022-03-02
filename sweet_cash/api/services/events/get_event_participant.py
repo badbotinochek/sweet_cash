@@ -6,7 +6,7 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class GetEventParticipant:
+class GetEventParticipant(object):
 
     def __call__(self, **kwargs) -> EventParticipantsModel:
         user_id = kwargs.get("user_id")

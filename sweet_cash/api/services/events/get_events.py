@@ -8,8 +8,8 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class GetEvents:
-    event_participant = GetEventParticipant()
+class GetEvents(object):
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, **kwargs) -> [EventModel]:
         user_id = kwargs.get("user_id")
@@ -18,7 +18,7 @@ class GetEvents:
         events = []
         for event_id in event_ids:
             # Checking that user is a participant in event
-            self.event_participant(event_id=event_id, user_id=user_id)
+            self.get_event_participant(event_id=event_id, user_id=user_id)
 
             # Get event
             event = EventModel.get_by_id(event_id=event_id)

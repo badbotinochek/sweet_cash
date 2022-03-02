@@ -10,9 +10,9 @@ import api.errors as error
 logger = logging.getLogger(name="transactions")
 
 
-class CreateTransaction:
-    event_participant = GetEventParticipant()
-    receipt = GetReceipt()
+class CreateTransaction(object):
+    get_event_participant = GetEventParticipant()
+    get_receipt = GetReceipt()
 
     def __call__(self, **kwargs) -> TransactionModel:
         user_id = kwargs.get("user_id")
@@ -41,10 +41,10 @@ class CreateTransaction:
                            f'category {transactions_category_id}')
             raise error.APIValueNotFound(f'Transaction category with id {transactions_category_id} not found')
 
-        self.event_participant(event_id=event_id, user_id=user_id, accepted=True)
+        self.get_event_participant(event_id=event_id, user_id=user_id, accepted=True)
 
         if receipt_id is not None:
-            self.receipt(receipt_id=receipt_id, user_id=user_id)
+            self.get_receipt(receipt_id=receipt_id, user_id=user_id)
 
         transaction = TransactionModel(user_id=user_id,
                                        event_id=event_id,
