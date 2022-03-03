@@ -1,1 +1,1 @@
-app: python3 app.py
+web: python sweet_cash/app.py
