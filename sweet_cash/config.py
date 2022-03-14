@@ -4,6 +4,11 @@ class Config:
     DATABASE_URI = 'postgresql://postgres:12345@localhost:5432/postgres'
     # DATABASE_URI = 'postgresql://postgres:911911@app_pg:5432/postgres'
 
+    REDIS_HOST = 'app_redis'
+    REDIS_PORT = 6379
+    REDIS_DB = 0
+    REDIS_PASSWORD = ''
+
     NALOG_RU_HOST = 'https://irkkt-mobile.nalog.ru:8888'
     NALOG_RU_CLIENT_SECRET = 'IyvrAbKt9h/8p6a7QPh8gpkXYQ4='
     NALOG_RU_OS = 'Android'
@@ -21,3 +26,11 @@ class Config:
     SMTP_PORT = 465
     EMAIL_ADDRESS = 'dka45-1p@yandex.ru'
     EMAIL_PASSWORD = 'qbrosrbmvqepucsn'
+
+    JWT_EXPIRE_TIME = 24
+
+    DEBUG = True
+
+    EVENT_PROCESSORS = ['Processor-1']
+    EVENT_LISTENING_PERIOD_IN_SECONDS = 10
+    

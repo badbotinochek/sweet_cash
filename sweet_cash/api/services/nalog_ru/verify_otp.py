@@ -9,7 +9,7 @@ import api.errors as error
 logger = logging.getLogger(name="nalog_ru")
 
 
-class VerifyOtpForNalogRu:
+class VerifyOtpForNalogRu(object):
     get_user = GetUser()
     nalog_ru_api = NalogRuApi()
     create_or_update_nalog_ru_session = CreateOrUpdateNalogRuSession()

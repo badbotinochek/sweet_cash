@@ -8,7 +8,7 @@ import api.errors as error
 logger = logging.getLogger(name="nalog_ru")
 
 
-class SendOtpForNalogRu:
+class SendOtpForNalogRu(object):
     nalog_ru_api = NalogRuApi()
     get_user = GetUser()
 

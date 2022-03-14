@@ -6,7 +6,7 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class GetEventParticipant:
+class GetEventParticipant(object):
 
     def __call__(self, **kwargs) -> EventParticipantsModel:
         user_id = kwargs.get("user_id")
@@ -22,7 +22,7 @@ class GetEventParticipant:
 
         if event_participant is None:
             logger.warning(f'Trying to get a non-existent event participant {user_id}')
-            raise error.APIValueNotFound(f'Participant {participant_id} not found')
+            raise error.APIValueNotFound(f'Participant for user {user_id} not found')
 
         if accepted is not None and event_participant.accepted is not accepted:
             if accepted:

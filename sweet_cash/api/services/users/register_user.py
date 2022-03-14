@@ -8,7 +8,7 @@ import api.errors as error
 logger = logging.getLogger(name="auth")
 
 
-class RegisterUser:
+class RegisterUser(object):
 
     def __call__(self, email: str, name: str, phone: str, password: str, send_email=SendEmail()):
         if not check_email_format(email):
