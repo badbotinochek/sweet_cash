@@ -8,9 +8,9 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class CreateEventParticipant:
+class CreateEventParticipant(object):
     get_user = GetUser()
-    event_participant = GetEventParticipant()
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, **kwargs) -> EventParticipantsModel:
         request_user_id = kwargs.get("request_user_id")
@@ -27,10 +27,10 @@ class CreateEventParticipant:
         self.get_user(user_id=user_id)
 
         # Checking that user from request is the event manager
-        self.event_participant(event_id=event_id,
-                               user_id=request_user_id,
-                               accepted=True,
-                               role='Manager')
+        self.get_event_participant(event_id=event_id,
+                                   user_id=request_user_id,
+                                   accepted=True,
+                                   role='Manager')
 
         # Checking that user is not event participant
         participant = EventParticipantsModel.get_by_event_and_user(event_id=event_id, user_id=int(user_id))

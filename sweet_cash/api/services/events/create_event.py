@@ -11,7 +11,7 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class CreateEvent:
+class CreateEvent(object):
     create_participant = CreateEventParticipant()
     confirm_participant = ConfirmEventParticipant()
 

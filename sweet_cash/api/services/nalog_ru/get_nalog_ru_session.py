@@ -6,7 +6,7 @@ import api.errors as error
 logger = logging.getLogger(name="nalog_ru")
 
 
-class GetNalogRuSession:
+class GetNalogRuSession(object):
 
     def __call__(self, user_id: int) -> NalogRuSessionModel:
         session = NalogRuSessionModel.get_by_user(user_id=user_id)

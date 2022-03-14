@@ -149,6 +149,26 @@ def check_password_format(password: str):
     return result
 
 
+def ids2list(ids):
+    if type(ids) is list:
+        return ids
+
+    ids_list = []
+
+    if ids is None:
+        return ids_list
+
+    split_list = ids.split(',')
+
+    for elem in split_list:
+        try:
+            ids_list.append(int(elem))
+        except ValueError:
+            continue
+
+    return ids_list
+
+
 def str2datetime(datetime_str: str):
     try:
         return datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%SZ')
@@ -230,7 +250,7 @@ def formatting(data) -> dict:
                 "role": data.role.value,
                 "is_accepted": data.accepted
             }
-        elif type(data) is TransactionCategoryModel:
+        elif isinstance(data, TransactionCategoryModel):
             formatted_data = {
                 "id": data.id,
                 "created_at": data.created_at,

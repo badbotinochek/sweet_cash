@@ -7,8 +7,8 @@ import api.errors as error
 logger = logging.getLogger(name="events")
 
 
-class UpdateEventParticipant:
-    event_participant = GetEventParticipant()
+class UpdateEventParticipant(object):
+    get_event_participant = GetEventParticipant()
 
     def __call__(self, **kwargs) -> EventParticipantsModel:
         user_id = kwargs.get("user_id")
@@ -22,13 +22,13 @@ class UpdateEventParticipant:
             raise error.APIParamError(f'Invalid participant role {role}')
 
         # Checking that user is the event manager
-        self.event_participant(event_id=event_id,
-                               user_id=user_id,
-                               accepted=True,
-                               role='Manager')
+        self.get_event_participant(event_id=event_id,
+                                   user_id=user_id,
+                                   accepted=True,
+                                   role='Manager')
 
         # Get event participant for user
-        participant = self.event_participant(participant_id=participant_id)
+        participant = self.get_event_participant(participant_id=participant_id)
 
         if participant.event_id != event_id:
             logger.warning(f'User {user_id} is trying to update participant {participant_id} form other event')

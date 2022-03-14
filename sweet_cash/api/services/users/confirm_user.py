@@ -8,7 +8,7 @@ import api.errors as error
 logger = logging.getLogger(name="auth")
 
 
-class ConfirmUser:
+class ConfirmUser(object):
 
     def __call__(self, email: str, confirmation_code: str):
 

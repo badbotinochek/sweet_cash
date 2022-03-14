@@ -1,13 +1,12 @@
-
 from flask import Flask
 from flask_jwt_extended import JWTManager
 import logging
+import redis
 
 from db import db
 from config import Config
 from api.services.notification_processing.notification_processor import NotificationProcessor
 from message_queue import MessageQueue
-
 
 logging.basicConfig(filename="../logs.log",
                     level=logging.INFO,
@@ -17,6 +16,11 @@ logging.basicConfig(filename="../logs.log",
 app = Flask(__name__)
 
 messages_queue = MessageQueue()
+
+redis = redis.Redis(Config.REDIS_HOST,
+                    Config.REDIS_PORT,
+                    Config.REDIS_DB,
+                    Config.REDIS_PASSWORD)
 
 
 def create_app():
@@ -50,7 +54,7 @@ def create_app():
     app.register_blueprint(error.blueprint)
 
     # Run notification processing
-    processors_names = ['Processor-1']  # TODO в config
+    processors_names = Config.EVENT_PROCESSORS
     processors = [NotificationProcessor(name=name, q=messages_queue) for name in processors_names]
     for processor in processors:
         processor.start()
@@ -61,6 +65,6 @@ def create_app():
 if __name__ == '__main__':
     try:
         app = create_app()
-        app.run(debug=True)  # , host='0.0.0.0')  # TODO  debug to config
+        app.run(debug=Config.DEBUG, host='0.0.0.0')
     except Exception as e:
         print(e)

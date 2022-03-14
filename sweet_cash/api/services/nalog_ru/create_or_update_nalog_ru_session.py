@@ -5,7 +5,7 @@ from api.models.nalog_ru_session import NalogRuSessionModel
 logger = logging.getLogger(name="nalog_ru")
 
 
-class CreateOrUpdateNalogRuSession:
+class CreateOrUpdateNalogRuSession(object):
 
     def __call__(self, user_id: int, session_id: int, refresh_token: str) -> NalogRuSessionModel:
         session = NalogRuSessionModel.get_by_user(user_id=int(user_id))
