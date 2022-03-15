@@ -6,10 +6,13 @@ services:
         build: .
         # Имя для создаваемого контейнера
         container_name: sweet_cash-app
+        # Файл с переменными окружения
+        env_file:
+            - local.env
         # Создание переменных окружения в контейнере
         environment:
           # для отладки (при запуске в релиз убрать!)
-            - FLASK_ENV=development
+            # - FLASK_ENV=development
           ## Позволяет отслеживать процесс работы приложения в командной строке
             - PYTHONUNBUFFERED=True
         # Перезапускаем сервис в случае падения
