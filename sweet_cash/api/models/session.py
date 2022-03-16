@@ -3,10 +3,10 @@ import uuid
 from datetime import datetime
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
-from config import Config
 
-from db import db
-from api.models.base import BaseModel
+from sweet_cash.db import db
+from sweet_cash.api.models.base import BaseModel
+from sweet_cash.config import Config
 
 
 class SessionModel(BaseModel):

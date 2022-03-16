@@ -2,9 +2,9 @@
 from flask import request, Blueprint
 import logging
 
-from api.services.nalog_ru.send_otp import SendOtpForNalogRu
-from api.services.nalog_ru.verify_otp import VerifyOtpForNalogRu
-from api.api import SuccessResponse, auth, jsonbody, features
+from sweet_cash.api.services.nalog_ru.send_otp import SendOtpForNalogRu
+from sweet_cash.api.services.nalog_ru.verify_otp import VerifyOtpForNalogRu
+from sweet_cash.api.api import SuccessResponse, auth, jsonbody, features
 
 logger = logging.getLogger(name="external_auth")
 

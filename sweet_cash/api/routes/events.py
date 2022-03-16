@@ -1,15 +1,15 @@
 from flask import request, Blueprint
 import logging
 
-from api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
-from api.services.events.create_event import CreateEvent
-from api.services.events.get_events import GetEvents
-from api.services.events.get_events_by_filter import GetEventsByFilter
-from api.services.events.update_event import UpdateEvent
-from api.services.events.create_event_participant import CreateEventParticipant
-from api.services.events.update_event_participant import UpdateEventParticipant
-from api.services.events.confirm_event_participant import ConfirmEventParticipant
-from api.services.events.reject_event_participant import RejectEventParticipant
+from sweet_cash.api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
+from sweet_cash.api.services.events.create_event import CreateEvent
+from sweet_cash.api.services.events.get_events import GetEvents
+from sweet_cash.api.services.events.get_events_by_filter import GetEventsByFilter
+from sweet_cash.api.services.events.update_event import UpdateEvent
+from sweet_cash.api.services.events.create_event_participant import CreateEventParticipant
+from sweet_cash.api.services.events.update_event_participant import UpdateEventParticipant
+from sweet_cash.api.services.events.confirm_event_participant import ConfirmEventParticipant
+from sweet_cash.api.services.events.reject_event_participant import RejectEventParticipant
 
 logger = logging.getLogger(name="events")
 

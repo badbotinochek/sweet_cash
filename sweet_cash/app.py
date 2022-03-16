@@ -3,10 +3,10 @@ from flask_jwt_extended import JWTManager
 import logging
 import redis
 
-from db import db
-from config import Config
-from api.services.notification_processing.notification_processor import NotificationProcessor
-from message_queue import MessageQueue
+from sweet_cash.db import db
+from sweet_cash.config import Config
+from sweet_cash.api.services.notification_processing.notification_processor import NotificationProcessor
+from sweet_cash.message_queue import MessageQueue
 
 logging.basicConfig(filename="../logs.log",
                     level=logging.INFO,
@@ -17,24 +17,15 @@ app = Flask(__name__)
 
 messages_queue = MessageQueue()
 
-redis = redis.Redis(Config.REDIS_HOST,
-                    Config.REDIS_PORT,
-                    Config.REDIS_DB,
-                    Config.REDIS_PASSWORD)
+# redis = redis.Redis(Config.REDIS_HOST,
+#                     Config.REDIS_PORT,
+#                     Config.REDIS_DB,
+#                     Config.REDIS_PASSWORD)
 
 
 def create_app():
-    # import errors
-    import api.errors as error
-
-    # import routes
-    from api.routes.auth import auth_api
-    from api.routes.transactions import transactions_api
-    from api.routes.external_auth import external_auth_api
-    from api.routes.receipts import receipts_api
-    from api.routes.events import events_api
-
     # db
+    print(Config.DATABASE_URI)
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
@@ -42,9 +33,14 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    # jwt
-    app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
-    jwt = JWTManager(app)
+    # import errors
+    import sweet_cash.api.errors as error
+    # import routes
+    from sweet_cash.api.routes.auth import auth_api
+    from sweet_cash.api.routes.transactions import transactions_api
+    from sweet_cash.api.routes.external_auth import external_auth_api
+    from sweet_cash.api.routes.receipts import receipts_api
+    from sweet_cash.api.routes.events import events_api
 
     app.register_blueprint(auth_api)
     app.register_blueprint(transactions_api)
@@ -52,6 +48,10 @@ def create_app():
     app.register_blueprint(receipts_api)
     app.register_blueprint(events_api)
     app.register_blueprint(error.blueprint)
+
+    # jwt
+    app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
+    jwt = JWTManager(app)
 
     # Run notification processing
     processors_names = Config.EVENT_PROCESSORS
@@ -62,9 +62,12 @@ def create_app():
     return app
 
 
+create_app()
+
+
 if __name__ == '__main__':
     try:
-        app = create_app()
+        # app = create_app()
         app.run(debug=Config.DEBUG, host='0.0.0.0')
     except Exception as e:
         print(e)

@@ -1,7 +1,7 @@
 import logging
 
-from api.models.users import UserModel
-import api.errors as error
+from sweet_cash.api.models.users import UserModel
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="auth")
 

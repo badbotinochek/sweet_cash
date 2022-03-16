@@ -1,9 +1,9 @@
 import logging
 
-from api.api import check_email_format, check_password_format, check_phone_format
-from api.models.users import UserModel
-from api.services.email_sending.send_email import SendEmail
-import api.errors as error
+from sweet_cash.api.api import check_email_format, check_password_format, check_phone_format
+from sweet_cash.api.models.users import UserModel
+from sweet_cash.api.services.email_sending.send_email import SendEmail
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="auth")
 

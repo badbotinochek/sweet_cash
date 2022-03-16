@@ -1,7 +1,7 @@
 import logging
 
-from api.models.receipt import ReceiptModel
-import api.errors as error
+from sweet_cash.api.models.receipt import ReceiptModel
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="transactions")
 

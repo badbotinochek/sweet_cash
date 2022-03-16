@@ -1,12 +1,12 @@
 from datetime import datetime
 import logging
 
-from api.integrations.nalog_ru import NalogRuApi
-from api.models.receipt import ReceiptModel
-from api.services.transactions.create_transaction import CreateTransaction
-from api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
-from api.services.events.get_event_participant import GetEventParticipant
-import api.errors as error
+from sweet_cash.api.integrations.nalog_ru import NalogRuApi
+from sweet_cash.api.models.receipt import ReceiptModel
+from sweet_cash.api.services.transactions.create_transaction import CreateTransaction
+from sweet_cash.api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
+from sweet_cash.api.services.events.get_event_participant import GetEventParticipant
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="receipts")
 

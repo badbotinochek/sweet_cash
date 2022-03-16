@@ -1,11 +1,11 @@
 import logging
 
-from api.api import check_email_format, check_password_format
-from api.models.users import UserModel
-from api.models.session import SessionModel
-from api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
+from sweet_cash.api.api import check_email_format, check_password_format
+from sweet_cash.api.models.users import UserModel
+from sweet_cash.api.models.session import SessionModel
+from sweet_cash.api.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
 
-import api.errors as error
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="auth")
 

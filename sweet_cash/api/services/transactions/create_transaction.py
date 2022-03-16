@@ -1,11 +1,11 @@
 import logging
 
-from api.models.transaction_category import TransactionCategoryModel
-from api.services.events.get_event_participant import GetEventParticipant
-from api.services.receipts.get_receipt import GetReceipt
-from api.models.transaction import TransactionModel, TransactionType
-from config import Config
-import api.errors as error
+from sweet_cash.api.models.transaction_category import TransactionCategoryModel
+from sweet_cash.api.services.events.get_event_participant import GetEventParticipant
+from sweet_cash.api.services.receipts.get_receipt import GetReceipt
+from sweet_cash.api.models.transaction import TransactionModel, TransactionType
+from sweet_cash.config import Config
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="transactions")
 

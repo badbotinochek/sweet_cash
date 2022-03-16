@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
-from config import Config
+from sweet_cash.config import Config
 
 logger = logging.getLogger(name="email sending")
 

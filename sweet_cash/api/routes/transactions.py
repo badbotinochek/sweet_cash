@@ -1,13 +1,13 @@
 from flask import request, Blueprint
 import logging
 
-from api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
-from api.services.transactions.create_transaction import CreateTransaction
-from api.services.transactions.update_transaction import UpdateTransaction
-from api.services.transactions.get_transaction import GetTransactions
-from api.services.transactions.get_transactions import GetAllTransactions
-from api.services.transactions.delete_transaction import DeleteTransaction
-from api.services.transactions.get_categories import GetCategories
+from sweet_cash.api.api import SuccessResponse, auth, jsonbody, query_params, features, formatting
+from sweet_cash.api.services.transactions.create_transaction import CreateTransaction
+from sweet_cash.api.services.transactions.update_transaction import UpdateTransaction
+from sweet_cash.api.services.transactions.get_transaction import GetTransactions
+from sweet_cash.api.services.transactions.get_transactions import GetAllTransactions
+from sweet_cash.api.services.transactions.delete_transaction import DeleteTransaction
+from sweet_cash.api.services.transactions.get_categories import GetCategories
 
 logger = logging.getLogger(name="transactions")
 

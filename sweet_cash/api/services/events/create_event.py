@@ -1,12 +1,12 @@
 
 import logging
 
-from api.models.event import EventModel
-from api.models.event_participants import EventParticipantsModel, EventParticipantRole
-from api.services.events.create_event_participant import CreateEventParticipant
-from api.services.events.confirm_event_participant import ConfirmEventParticipant
-from api.api import str2datetime
-import api.errors as error
+from sweet_cash.api.models.event import EventModel
+from sweet_cash.api.models.event_participants import EventParticipantsModel, EventParticipantRole
+from sweet_cash.api.services.events.create_event_participant import CreateEventParticipant
+from sweet_cash.api.services.events.confirm_event_participant import ConfirmEventParticipant
+from sweet_cash.api.api import str2datetime
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="events")
 
