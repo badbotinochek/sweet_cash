@@ -17,10 +17,10 @@ app = Flask(__name__)
 
 messages_queue = MessageQueue()
 
-# redis = redis.Redis(Config.REDIS_HOST,
-#                     Config.REDIS_PORT,
-#                     Config.REDIS_DB,
-#                     Config.REDIS_PASSWORD)
+redis = redis.Redis(Config.REDIS_HOST,
+                    Config.REDIS_PORT,
+                    Config.REDIS_DB,
+                    Config.REDIS_PASSWORD)
 
 
 def create_app():
@@ -29,8 +29,9 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
-    with app.app_context():
-        db.create_all()
+    # with app.app_context():
+    #     db.create_all()
+    #     db.session.commit()
 
     # import errors
     import sweet_cash.api.errors as error
@@ -62,6 +63,9 @@ def create_app():
 
 
 create_app()
+with app.app_context():
+    db.create_all()
+    db.session.commit()
 
 
 if __name__ == '__main__':

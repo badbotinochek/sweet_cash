@@ -26,7 +26,7 @@ FROM python:3.7 AS builder
 COPY requirements.txt .
 
 # установка зависимостей в локальную директорию user (например, /root/.local)
-RUN pip install --user -r requirements.txt
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 # второй этап (без названия)
 FROM python:3.7
@@ -34,14 +34,21 @@ FROM python:3.7
 # установка рабочей директории в контейнере
 WORKDIR /code
 
+RUN pip install uwsgi
+
 # копирование только установки зависимостей из образа первого этапа
 COPY --from=builder /root/.local /root/.local
 
 # копирование содержимого локальной директории в рабочую директорию
-COPY ./sweet_cash .
+COPY . .
 
 # обновление переменной среды PATH
 ENV PATH=/root/.local:$PATH
 
 # команда, выполняемая при запуске контейнера
-CMD [ "python", "./app.py" ]
+# CMD [ "python", "./app.py" ]
+CMD ["uwsgi", "--ini", "app.ini", "--need-app"]
+#CMD ["uwsgi", "--socket", "0.0.0.0:5000", "--uid", "uwsgi", \
+#               "--plugins", "python3", \
+#               "--protocol", "uwsgi", \
+#               "--wsgi", "app:app" ]
