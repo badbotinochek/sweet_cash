@@ -25,7 +25,6 @@ messages_queue = MessageQueue()
 
 def create_app():
     # db
-    print(Config.DATABASE_URI)
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
