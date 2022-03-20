@@ -27,7 +27,7 @@ class Config:
     EMAIL_ADDRESS: str = os.getenv("EMAIL_ADDRESS")
     EMAIL_PASSWORD: str = os.getenv("EMAIL_PASSWORD")
 
-    SWEET_CASH_URL = 'https://bsikpg.duckdns.ru'
+    SWEET_CASH_URL = 'http://bsikpg.duckdns.ru'
 
     EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     PHONE_REGEX = r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$'

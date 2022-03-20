@@ -21,10 +21,10 @@ class ConfirmUser(object):
         try:
             decode_token(encoded_token=confirmation_code)
         except Exception as e:
-            return open('templates/fail_confirmation.html', 'r').read()
+            return open('sweet_cash/templates/fail_confirmation.html', 'r').read()
 
         user.update(confirmed=True)
 
         logger.info(f'User {user.id} confirmed')
 
-        return open('templates/success_confirmation.html', 'r').read()
+        return open('sweet_cash/templates/success_confirmation.html', 'r').read()
