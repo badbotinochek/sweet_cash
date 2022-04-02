@@ -66,4 +66,5 @@ class EventParticipantsModel(BaseModel):
     @classmethod
     def delete(cls, participant_id: int):
         result = cls.query.filter(cls.id == participant_id).delete()
+        db.session.commit()
         return result
