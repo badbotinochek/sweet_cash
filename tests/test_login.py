@@ -1,5 +1,3 @@
-import requests
-
 HOST = 'http://127.0.0.1:5000'
 NAME = "testName"
 EMAIL = "test1@test.com"
@@ -13,7 +11,8 @@ TEST REGISTER
 '''
 
 
-def test_register_success(client):
+def test_register_success(client, deleted_date):
+    """Ожидаемый результат - Успех. Регистрация пользователя"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
@@ -30,6 +29,7 @@ def test_register_success(client):
 
 
 def test_register_without_body(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя без тела запроса"""
     response = client.post(
         HOST + "/api/v1/auth/register"
     )
@@ -43,6 +43,7 @@ def test_register_without_body(client):
 
 
 def test_register_without_required_params(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя без обязательных параметров"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={},
@@ -58,6 +59,7 @@ def test_register_without_required_params(client):
 
 
 def test_register_with_wrong_types_for_params(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя с не правильными типами параметров"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
@@ -78,6 +80,7 @@ def test_register_with_wrong_types_for_params(client):
 
 
 def test_register_with_invalid_email_format(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя с невалидной электронной почтой"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
@@ -97,6 +100,7 @@ def test_register_with_invalid_email_format(client):
 
 
 def test_register_with_invalid_phone_format(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя с невалидным номером телефона"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
@@ -116,6 +120,7 @@ def test_register_with_invalid_phone_format(client):
 
 
 def test_register_with_invalid_password_format(client):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя с невалидным паролем"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
@@ -134,11 +139,12 @@ def test_register_with_invalid_password_format(client):
     }
 
 
-def test_register_with_registered_email(client, added_new_user):
+def test_register_with_registered_email(client, added_new_users):
+    """Ожидаемый результат - Ошибка. Регистрация пользователя с уже зарегистрированной электронной почтой"""
     response = client.post(
         HOST + "/api/v1/auth/register",
         json={
-            "name": EMAIL,
+            "name": 'test1@test.com',
             "email": EMAIL,
             "phone": PHONE,
             "password": PASSWORD
@@ -158,7 +164,8 @@ TEST LOGIN
 '''
 
 
-def test_login_success(client, added_new_user):
+def test_login_success(client, added_new_users):
+    """Ожидаемый результат - Успех. Авторизация пользователя"""
     global REFRESH_TOKEN
     response = client.post(
         HOST + "/api/v1/auth/login",
@@ -177,6 +184,7 @@ def test_login_success(client, added_new_user):
 
 
 def test_login_without_body(client):
+    """Ожидаемый результат - Ошибка. Авторизация пользователя без тела запроса"""
     response = client.post(
         HOST + "/api/v1/auth/login"
     )
@@ -190,6 +198,7 @@ def test_login_without_body(client):
 
 
 def test_login_without_required_params(client):
+    """Ожидаемый результат - Ошибка. Авторизация пользователя без обязательных параметров"""
     response = client.post(
         HOST + "/api/v1/auth/login",
         json={},
@@ -205,6 +214,7 @@ def test_login_without_required_params(client):
 
 
 def test_login_with_wrong_types_for_params(client):
+    """Ожидаемый результат - Ошибка. Авторизация пользователя с не правильным типом параметров"""
     response = client.post(
         HOST + "/api/v1/auth/login",
         json={
@@ -222,7 +232,8 @@ def test_login_with_wrong_types_for_params(client):
     }
 
 
-def test_login_with_new_refresh_token(client, added_new_user):
+def test_login_with_new_refresh_token(client, added_new_users):
+    """Ожидаемый результат - Успех. Авторизация пользователя с новым рефреш токеном"""
     global REFRESH_TOKEN
     response = client.post(
         HOST + "/api/v1/auth/login",
@@ -241,7 +252,8 @@ def test_login_with_new_refresh_token(client, added_new_user):
     REFRESH_TOKEN = response.get_json()["refresh_token"]
 
 
-def test_login_with_wrong_password(client, added_new_user):
+def test_login_with_wrong_password(client, added_new_users):
+    """Ожидаемый результат - Ошибка. Авторизация пользователя не правильным паролем"""
     response = client.post(
         HOST + "/api/v1/auth/login",
         json={
@@ -258,7 +270,8 @@ def test_login_with_wrong_password(client, added_new_user):
     }
 
 
-def test_login_with_invalid_email_format(client, added_new_user):
+def test_login_with_invalid_email_format(client):
+    """Ожидаемый результат - Ошибка. Авторизация пользователя с невалидной электронной почтой"""
     response = client.post(
         HOST + "/api/v1/auth/login",
         json={
@@ -280,7 +293,8 @@ TEST GETTING TOKEN
 '''
 
 
-def test_getting_token_success(client, added_new_user):
+def test_getting_token_success(client, added_new_users):
+    """Ожидаемый результат - Успех. Получение токена"""
     global REFRESH_TOKEN, TOKEN
     response = client.post(
         HOST + "/api/v1/auth/login",
@@ -308,6 +322,7 @@ def test_getting_token_success(client, added_new_user):
 
 
 def test_getting_token_without_body(client):
+    """Ожидаемый результат - Ошибка. Получение токена без тела запроса"""
     response = client.post(
         HOST + "/api/v1/auth/token"
     )
@@ -321,6 +336,7 @@ def test_getting_token_without_body(client):
 
 
 def test_getting_token_without_required_params(client):
+    """Ожидаемый результат - Ошибка. Получение токена без тела запроса"""
     response = client.post(
         HOST + "/api/v1/auth/token",
         json={},
@@ -336,6 +352,7 @@ def test_getting_token_without_required_params(client):
 
 
 def test_getting_token_with_wrong_types_for_params(client):
+    """Ожидаемый результат - Ошибка. Получение токена с не правильным типом у параметра"""
     response = client.post(
         HOST + "/api/v1/auth/token",
         json={
@@ -352,7 +369,8 @@ def test_getting_token_with_wrong_types_for_params(client):
     }
 
 
-def test_getting_new_token(client, added_new_user):
+def test_getting_new_token(client, added_new_users):
+    """Ожидаемый результат - Успех. Получение нового рефреш токена"""
     global REFRESH_TOKEN, TOKEN
     response = client.post(
         HOST + "/api/v1/auth/login",
@@ -380,6 +398,7 @@ def test_getting_new_token(client, added_new_user):
 
 
 def test_getting_token_with_old_refresh_token(client):
+    """Ожидаемый результат - Ошибка. Получение токена с использованием просроченного рефреш токена"""
     response = client.post(
         HOST + "/api/v1/auth/token",
         json={
@@ -396,6 +415,7 @@ def test_getting_token_with_old_refresh_token(client):
 
 
 def test_getting_token_with_wrong_refresh_token(client):
+    """Ожидаемый результат - Ошибка. Получение токена с несуществующим рефреш токеном"""
     response = client.post(
         HOST + "/api/v1/auth/token",
         json={
@@ -416,7 +436,8 @@ TEST CONFIRMATION USER
 '''
 
 
-def test_confirm_registration_success(client, added_new_user):
+def test_confirm_registration_success(client, added_new_users):
+    """Ожидаемый результат - Успех. Подтверждение регистрации"""
     response = client.get(
         HOST + "/api/v1/auth/confirm?email=" + EMAIL + "&code=1234"
     )
@@ -425,6 +446,7 @@ def test_confirm_registration_success(client, added_new_user):
 
 
 def test_confirm_registration_without_required_params(client):
+    """Ожидаемый результат - Ошибка. Подтверждение токена без обязательных параметров"""
     response = client.get(
         HOST + "/api/v1/auth/confirm"
     )
@@ -443,6 +465,7 @@ TEST SENDING CONFIRM CODE
 
 
 def test_send_code_success(client):
+    """Ожидаемый результат - Успех. Повторный запрос кода подтверждения регистрации"""
     global REFRESH_TOKEN, TOKEN
     response = client.get(
         HOST + "/api/v1/auth/code?email=" + EMAIL
@@ -452,6 +475,7 @@ def test_send_code_success(client):
 
 
 def test_send_code_without_required_params(client):
+    """Ожидаемый результат - Ошибка. Повторный запрос кода подтверждения регистрации без обязательных параметров"""
     response = client.get(
         HOST + "/api/v1/auth/code"
     )

@@ -13,7 +13,6 @@ class ConfirmUser(object):
 
     def __call__(self, email: str, confirmation_code: str):
 
-        a = Path.cwd()
         user = UserModel.get_user(email=email)
 
         if user is None:

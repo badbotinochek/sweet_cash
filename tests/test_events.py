@@ -1,48 +1,16 @@
-import pytest
-import requests
-
 HOST = 'http://127.0.0.1:5000'
-user_email = (lambda n: f'test{n}@test.com')
-PASSWORD = "1@yAndexru"
 
-USER_IDS = []
-TOKENS = []
-
-for i in range(1, 4):
-    login_response = requests.post(
-        HOST + "/api/v1/auth/login",
-        json={
-            "email": user_email(i),
-            "password": PASSWORD
-        },
-        headers={"Content-Type": "application/json"}
-    ).json()
-
-    refresh_token = login_response["refresh_token"]
-    USER_IDS.append(login_response["user_id"])
-
-    token = requests.post(
-        HOST + "/api/v1/auth/token",
-        json={
-            "refresh_token": refresh_token
-        },
-        headers={"Content-Type": "application/json"}
-    ).json()["token"]
-    TOKENS.append(token)
-
-
-
-EVENT_ID = ''
-PARTICIPANT_ID = ''
 
 '''
 TEST CREATING EVENT
 '''
 
 
-def test_create_event_success():
-    global EVENT_ID
-    response = requests.post(
+def test_create_event_success(client, get_token):
+    """Ожидаемый результат - Успех. Создание нового мероприятия"""
+    tokens = get_token[0]
+    user_ids = get_token[1]
+    response = client.post(
         HOST + "/api/v1/events",
         json={
             "name": "Событие",
@@ -51,11 +19,11 @@ def test_create_event_success():
             "description": "description"
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert "id" in response
     assert "created_at" in response
     assert "updated_at" in response
@@ -76,16 +44,15 @@ def test_create_event_success():
     assert "created_at" in response['participants_info']['participants'][0]
     assert "updated_at" in response['participants_info']['participants'][0]
     assert "user_id" in response['participants_info']['participants'][0]
-    assert response['participants_info']['participants'][0]["user_id"] == USER_IDS[0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[0]
     assert "role" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["role"] == "Manager"
     assert "is_accepted" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["is_accepted"] is True
-    EVENT_ID = response["id"]
 
 
-def test_create_event_without_valid_token():
-    response = requests.post(
+def test_create_event_without_valid_token(client):
+    response = client.post(
         HOST + "/api/v1/events",
         json={
             "name": "Событие",
@@ -97,40 +64,47 @@ def test_create_event_without_valid_token():
                  "Authorization": ""}
     )
     assert response.status_code == 401
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "msg": "Missing Authorization Header"
+    }
 
 
-def test_create_event_without_body():
-    response = requests.post(
+def test_create_event_without_body(client, get_token):
+    tokens = get_token[0]
+    response = client.post(
         HOST + "/api/v1/events",
-        headers={"Authorization": "Bearer " + TOKENS[0]}
+        headers={"Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Json required",
         "status": 400
     }
 
 
-def test_create_event_without_required_params():
-    response = requests.post(
+def test_create_event_without_required_params(client, get_token):
+    tokens = get_token[0]
+    response = client.post(
         HOST + "/api/v1/events",
         json={},
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Params ('name',) required",
         "status": 400
     }
 
 
-def test_create_event_with_wrong_types_for_params():
-    response = requests.post(
+def test_create_event_with_wrong_types_for_params(client, get_token):
+    tokens = get_token[0]
+    response = client.post(
         HOST + "/api/v1/events",
         json={
             "name": 1,
@@ -139,11 +113,11 @@ def test_create_event_with_wrong_types_for_params():
             "description": -1
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Invalid type for params ('name', 'start', 'end', 'description')",
         "status": 400
@@ -155,15 +129,18 @@ TEST GETTING EVENTS
 '''
 
 
-def test_get_events_success():
-    response = requests.get(
-        HOST + "/api/v1/events?ids=" + str(EVENT_ID),
+def test_get_events_for_manager_success(client, create_events):
+    tokens = create_events[0]
+    user_ids = create_events[1]
+    event_ids = create_events[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[0]),
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert len(response) == 1
     response = response[0]
     assert "id" in response
@@ -186,31 +163,228 @@ def test_get_events_success():
     assert "created_at" in response['participants_info']['participants'][0]
     assert "updated_at" in response['participants_info']['participants'][0]
     assert "user_id" in response['participants_info']['participants'][0]
-    assert response['participants_info']['participants'][0]["user_id"] == USER_IDS[0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[0]
     assert "role" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["role"] == "Manager"
     assert "is_accepted" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["is_accepted"] is True
 
 
-def test_get_event_without_valid_token():
-    response = requests.get(
-        HOST + "/api/v1/events?ids=" + str(EVENT_ID),
+def test_get_events_for_not_verified_partner_success(client, create_participant):
+    tokens = create_participant[0]
+    user_ids = create_participant[1]
+    event_ids = create_participant[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[0]),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    response = response[0]
+    assert "id" in response
+    assert "created_at" in response
+    assert "updated_at" in response
+    assert "name" in response
+    assert "description" in response
+    assert "start" in response
+    assert "end" in response
+    assert "participants_info" in response
+    assert "total" in response['participants_info']
+    assert response['participants_info']["total"] == 2
+    assert "your_role" in response['participants_info']
+    assert response['participants_info']["your_role"] == "Partner"
+    assert "is_accepted" in response['participants_info']
+    assert response['participants_info']["is_accepted"] is False
+    assert "participants" in response['participants_info']
+    assert len(response['participants_info']['participants']) == 2
+    assert "id" in response['participants_info']['participants'][0]
+    assert "created_at" in response['participants_info']['participants'][0]
+    assert "updated_at" in response['participants_info']['participants'][0]
+    assert "user_id" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[0]
+    assert "role" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["role"] == "Manager"
+    assert "is_accepted" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["is_accepted"] is True
+
+
+def test_get_events_for_not_verified_observer_success(client, create_participant):
+    tokens = create_participant[0]
+    user_ids = create_participant[1]
+    event_ids = create_participant[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[6]),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[3]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    response = response[0]
+    assert "id" in response
+    assert "created_at" in response
+    assert "updated_at" in response
+    assert "name" in response
+    assert "description" in response
+    assert "start" in response
+    assert "end" in response
+    assert "participants_info" in response
+    assert "total" in response['participants_info']
+    assert response['participants_info']["total"] == 2
+    assert "your_role" in response['participants_info']
+    assert response['participants_info']["your_role"] == "Observer"
+    assert "is_accepted" in response['participants_info']
+    assert response['participants_info']["is_accepted"] is False
+    assert "participants" in response['participants_info']
+    assert len(response['participants_info']['participants']) == 2
+    assert "id" in response['participants_info']['participants'][0]
+    assert "created_at" in response['participants_info']['participants'][0]
+    assert "updated_at" in response['participants_info']['participants'][0]
+    assert "user_id" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[1]
+    assert "role" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["role"] == "Manager"
+    assert "is_accepted" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["is_accepted"] is True
+
+
+def test_get_events_for_verified_partner_success(client, confirm_event):
+    tokens = confirm_event[0]
+    user_ids = confirm_event[1]
+    event_ids = confirm_event[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[0]),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    response = response[0]
+    assert "id" in response
+    assert "created_at" in response
+    assert "updated_at" in response
+    assert "name" in response
+    assert "description" in response
+    assert "start" in response
+    assert "end" in response
+    assert "participants_info" in response
+    assert "total" in response['participants_info']
+    assert response['participants_info']["total"] == 2
+    assert "your_role" in response['participants_info']
+    assert response['participants_info']["your_role"] == "Partner"
+    assert "is_accepted" in response['participants_info']
+    assert response['participants_info']["is_accepted"] is True
+    assert "participants" in response['participants_info']
+    assert "id" in response['participants_info']['participants'][0]
+    assert "created_at" in response['participants_info']['participants'][0]
+    assert "updated_at" in response['participants_info']['participants'][0]
+    assert "user_id" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[0]
+    assert "role" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["role"] == "Manager"
+    assert "is_accepted" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["is_accepted"] is True
+
+
+def test_get_events_for_verified_observer_success(client, confirm_event):
+    tokens = confirm_event[0]
+    user_ids = confirm_event[1]
+    event_ids = confirm_event[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[6]),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[3]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    response = response[0]
+    assert "id" in response
+    assert "created_at" in response
+    assert "updated_at" in response
+    assert "name" in response
+    assert "description" in response
+    assert "start" in response
+    assert "end" in response
+    assert "participants_info" in response
+    assert "total" in response['participants_info']
+    assert response['participants_info']["total"] == 2
+    assert "your_role" in response['participants_info']
+    assert response['participants_info']["your_role"] == "Observer"
+    assert "is_accepted" in response['participants_info']
+    assert response['participants_info']["is_accepted"] is True
+    assert "participants" in response['participants_info']
+    assert "id" in response['participants_info']['participants'][0]
+    assert "created_at" in response['participants_info']['participants'][0]
+    assert "updated_at" in response['participants_info']['participants'][0]
+    assert "user_id" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[1]
+    assert "role" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["role"] == "Manager"
+    assert "is_accepted" in response['participants_info']['participants'][0]
+    assert response['participants_info']['participants'][0]["is_accepted"] is True
+
+
+def test_get_event_without_valid_token(client, create_events):
+    event_ids = create_events[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[0]),
         headers={"Content-Type": "application/json",
                  "Authorization": ""}
     )
     assert response.status_code == 401
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "msg": "Missing Authorization Header"
+    }
 
 
-def test_get_event_without_required_params():
-    response = requests.get(
+def test_get_event_without_required_params(client, create_events):
+    tokens = create_events[0]
+    response = client.get(
         HOST + "/api/v1/events",
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
+    assert len(response) == 0
+
+
+def test_get_null_events(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(event_ids[0]),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[1]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "Participant for user 2 not found"
+    }
+
+
+def test_get_events_without_ids(client, create_events):
+    tokens = create_events[0]
+    response = client.get(
+        HOST + "/api/v1/events?ids=" + str(),
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[0]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
     assert len(response) == 0
 
 
@@ -219,15 +393,16 @@ TEST GETTING EVENTS BY FILTER
 '''
 
 
-def test_get_events_by_filter_success():
-    response = requests.get(
+def test_get_events_manager_success(client, create_events):
+    tokens = create_events[0]
+    response = client.get(
         HOST + "/api/v1/events/by_filter?role=Manager",
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert len(response) > 0
     response = response[0]
     assert "id" in response
@@ -248,8 +423,53 @@ def test_get_events_by_filter_success():
     assert len(response['participants_info']['participants']) > 0
 
 
-def test__get_events_by_filter_without_valid_token():
-    response = requests.get(
+def test_get_events_by_filter_not_verified_participant_success(client, create_participant):
+    tokens = create_participant[0]
+    response = client.get(
+        HOST + "/api/v1/events/by_filter?accepted=False",
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 5
+    for i in range(4):
+        assert response[i]['participants_info']["is_accepted"] is False
+
+
+def test_get_events_by_filter_verified_partner_success(client, confirm_event):
+    tokens = confirm_event[0]
+    response = client.get(
+        HOST + "/api/v1/events/by_filter?accepted=True&role=Partner",
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    assert response[0]['participants_info']["is_accepted"] is True
+    assert response[0]['participants_info']["your_role"] == "Partner"
+
+
+def test_get_events_by_filter_verified_observer_success(client, confirm_event):
+    tokens = confirm_event[0]
+    response = client.get(
+        HOST + "/api/v1/events/by_filter?accepted=False&role=Observer",
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[3]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 1
+    assert response[0]['participants_info']["is_accepted"] is True
+    assert response[0]['participants_info']["your_role"] == "Observer"
+
+
+def test__get_events_by_filter_without_valid_token(client):
+    response = client.get(
         HOST + "/api/v1/events/by_filter?role=Manager",
         headers={"Content-Type": "application/json",
                  "Authorization": ""}
@@ -257,16 +477,30 @@ def test__get_events_by_filter_without_valid_token():
     assert response.status_code == 401
 
 
-def test_get_events_by_filter_without_required_params():
-    response = requests.get(
+def test_get_events_by_filter_without_required_params(client, create_events):
+    tokens = create_events[0]
+    response = client.get(
+        HOST + "/api/v1/events/by_filter?role",
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[0]}
+    )
+    assert response.status_code == 400
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) > 0
+
+
+def test_get_events_by_filter_null_events(client, create_events):
+    tokens = create_events[0]
+    response = client.get(
         HOST + "/api/v1/events/by_filter?role=Manager",
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[2]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
-    assert len(response) > 0
+    response = response.get_json()
+    assert len(response) == 0
 
 
 '''
@@ -274,9 +508,12 @@ TEST UPDATING EVENT
 '''
 
 
-def test_update_event_success():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID),
+def test_update_event_without_participant_success(client, create_events):
+    tokens = create_events[0]
+    user_ids = create_events[1]
+    event_ids = create_events[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
         json={
             "name": "Событие 1",
             "start": "2022-02-01T04:25:03Z",
@@ -284,11 +521,11 @@ def test_update_event_success():
             "description": "description"
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert "id" in response
     assert "created_at" in response
     assert "updated_at" in response
@@ -310,16 +547,17 @@ def test_update_event_success():
     assert "created_at" in response['participants_info']['participants'][0]
     assert "updated_at" in response['participants_info']['participants'][0]
     assert "user_id" in response['participants_info']['participants'][0]
-    assert response['participants_info']['participants'][0]["user_id"] == USER_IDS[0]
+    assert response['participants_info']['participants'][0]["user_id"] == user_ids[0]
     assert "role" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["role"] == "Manager"
     assert "is_accepted" in response['participants_info']['participants'][0]
     assert response['participants_info']['participants'][0]["is_accepted"] is True
 
 
-def test_update_event_without_valid_token():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID),
+def test_update_event_without_valid_token(client, create_events):
+    event_ids = create_events[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
         json={
             "name": "Событие 1",
             "start": "2022-02-01T04:25:03Z",
@@ -332,39 +570,45 @@ def test_update_event_without_valid_token():
     assert response.status_code == 401
 
 
-def test_update_event_without_body():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID),
-        headers={"Authorization": "Bearer " + TOKENS[0]}
+def test_update_event_without_body(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
+        headers={"Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Json required",
         "status": 400
     }
 
 
-def test_update_event_without_required_params():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID),
+def test_update_event_without_required_params(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
         json={},
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Params ('name',) required",
         "status": 400
     }
 
 
-def test_update_event_with_wrong_types_for_params():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID),
+def test_update_event_with_wrong_types_for_params(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
         json={
             "name": 1,
             "start": 1.5,
@@ -372,14 +616,102 @@ def test_update_event_with_wrong_types_for_params():
             "description": -1
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Invalid type for params ('name', 'start', 'end', 'description')",
         "status": 400
+    }
+
+
+def test_update_event_not_verified_partner_error(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
+        json={
+            "name": "Событие 1",
+            "start": "2022-02-01T04:25:03Z",
+            "end": "2022-02-01T04:25:03Z",
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "Accepted user 3 not found in event 1",
+    }
+
+
+def test_update_event_verified_partner_error(client, confirm_event):
+    tokens = confirm_event[0]
+    event_ids = confirm_event[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]),
+        json={
+            "name": "Событие 1",
+            "start": "2022-02-01T04:25:03Z",
+            "end": "2022-02-01T04:25:03Z",
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "User 3 with Manager not found in event 1",
+    }
+
+
+def test_update_event_not_verified_observer_error(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[6]),
+        json={
+            "name": "Событие 1",
+            "start": "2022-02-01T04:25:03Z",
+            "end": "2022-02-01T04:25:03Z",
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[3]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "Accepted user 4 not found in event 7",
+    }
+
+
+def test_update_event_verified_observer_error(client, confirm_event):
+    tokens = confirm_event[0]
+    event_ids = confirm_event[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[6]),
+        json={
+            "name": "Событие 1",
+            "start": "2022-02-01T04:25:03Z",
+            "end": "2022-02-01T04:25:03Z",
+            "description": "description"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[3]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "User 4 with Manager not found in event 7",
     }
 
 
@@ -388,37 +720,40 @@ TEST CREATING PARTICIPANT
 '''
 
 
-def test_create_participant_success():
-    global PARTICIPANT_ID
-    response = requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
+def test_create_participant_success(client, create_events):
+    tokens = create_events[0]
+    user_ids = create_events[1]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
         json={
-            "user_id": USER_IDS[1],
+            "user_id": user_ids[1],
             "role": "Partner"
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert "id" in response
     assert "created_at" in response
     assert "updated_at" in response
     assert "user_id" in response
-    assert response["user_id"] == USER_IDS[1]
+    assert response["user_id"] == user_ids[1]
     assert "role" in response
     assert response["role"] == "Partner"
     assert "is_accepted" in response
     assert response["is_accepted"] is False
-    PARTICIPANT_ID = response["id"]
 
 
-def test_create_participant_without_valid_token():
-    response = requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
+def test_create_participant_without_valid_token(client, create_events):
+    user_ids = create_events[1]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
         json={
-            "user_id": USER_IDS[1],
+            "user_id": user_ids[1],
             "role": "Partner"
         },
         headers={"Content-Type": "application/json",
@@ -427,52 +762,79 @@ def test_create_participant_without_valid_token():
     assert response.status_code == 401
 
 
-def test_create_participant_without_body():
-    response = requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
-        headers={"Authorization": "Bearer " + TOKENS[0]}
+def test_create_participant_without_body(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
+        headers={"Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Json required",
         "status": 400
     }
 
 
-def test_create_participant_without_required_params():
-    response = requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
+def test_create_participant_without_required_params(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
         json={},
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Params ('user_id', 'role') required",
         "status": 400
     }
 
 
-def test_create_participant_with_wrong_types_for_params():
-    response = requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
+def test_create_participant_with_wrong_types_for_params(client, create_events):
+    tokens = create_events[0]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
         json={
             "user_id": True,
             "role": 2
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Invalid type for params ('user_id', 'role')",
         "status": 400
+    }
+
+
+def test_create_participant_error(client, create_events):
+    tokens = create_events[0]
+    user_ids = create_events[1]
+    event_ids = create_events[2]
+    response = client.post(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant",
+        json={
+            "user_id": user_ids[1],
+            "role": "Partner"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "Participant for user 3 not found",
     }
 
 
@@ -481,33 +843,98 @@ TEST UPDATING PARTICIPANT
 '''
 
 
-def test_update_participant_success():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/" + str(PARTICIPANT_ID),
+def test_update_not_verified_participant_success(client, create_participant):
+    tokens = create_participant[0]
+    user_ids = create_participant[1]
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
         json={
-            "role": "Observer"
+            "role": "Manager"
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
-    response = response.json()
+    response = response.get_json()
     assert "id" in response
-    assert response["id"] == PARTICIPANT_ID
     assert "created_at" in response
     assert "updated_at" in response
     assert "user_id" in response
-    assert response["user_id"] == USER_IDS[1]
+    assert response["user_id"] == user_ids[2]
     assert "role" in response
-    assert response["role"] == "Observer"
+    assert response["role"] == "Manager"
     assert "is_accepted" in response
     assert response["is_accepted"] is False
 
 
-def test_update_participant_without_valid_token():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/" + str(PARTICIPANT_ID),
+def test_update_verified_participant_error(client, confirm_event):
+    tokens = confirm_event[0]
+    event_ids = confirm_event[2]
+    participant_ids = confirm_event[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
+        json={
+            "role": "Observer"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[0]}
+    )
+    assert response.status_code == 409
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Conflict",
+        "message": "You cannot update your participant",
+    }
+
+
+def test_update_participant_myself_error(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
+        json={
+            "role": "Observer"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "Accepted user 3 not found in event 1",
+    }
+
+
+def test_update_verified_participant_myself_error(client, confirm_event):
+    tokens = confirm_event[0]
+    event_ids = confirm_event[2]
+    participant_ids = confirm_event[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
+        json={
+            "role": "Observer"
+        },
+        headers={"Content-Type": "application/json",
+                 "Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 404
+    assert response.headers["Content-Type"] == "application/json"
+    assert response.get_json() == {
+        "error": "Not found",
+        "message": "User 3 with Manager not found in event 1",
+    }
+
+
+def test_update_participant_without_valid_token(client, create_participant):
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
         json={
             "role": "Observer"
         },
@@ -517,48 +944,57 @@ def test_update_participant_without_valid_token():
     assert response.status_code == 401
 
 
-def test_update_participant_without_body():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/" + str(PARTICIPANT_ID),
-        headers={"Authorization": "Bearer " + TOKENS[0]}
+def test_update_participant_without_body(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
+        headers={"Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Json required",
         "status": 400
     }
 
 
-def test_update_participant_without_required_params():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/" + str(PARTICIPANT_ID),
+def test_update_participant_without_required_params(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
         json={},
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Params ('role',) required",
         "status": 400
     }
 
 
-def test_update_participant_with_wrong_types_for_params():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/" + str(PARTICIPANT_ID),
+def test_update_participant_with_wrong_types_for_params(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    participant_ids = create_participant[3]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/" + str(participant_ids[0]),
         json={
             "role": 2
         },
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
+                 "Authorization": "Bearer " + tokens[0]}
     )
     assert response.status_code == 400
     assert response.headers["Content-Type"] == "application/json"
-    assert response.json() == {
+    assert response.get_json() == {
         "error_code": "bad-params",
         "message": "Invalid type for params ('role',)",
         "status": 400
@@ -570,19 +1006,23 @@ TEST CONFIRMATION EVENT
 '''
 
 
-def test_confirm_event_success():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/confirm",
+def test_confirm_event_success(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/confirm",
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[1]}
+                 "Authorization": "Bearer " + tokens[2]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
 
-def test_confirm_event_without_valid_token():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/confirm",
+def test_confirm_event_without_valid_token(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/confirm",
         headers={"Content-Type": "application/json",
                  "Authorization": ""}
     )
@@ -594,30 +1034,22 @@ TEST REJECTION EVENT
 '''
 
 
-def test_reject_event_success():
-    # Create a new participant
-    requests.post(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant",
-        json={
-            "user_id": USER_IDS[2],
-            "role": "Partner"
-        },
+def test_reject_event_success(client, create_participant):
+    tokens = create_participant[0]
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/reject",
         headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[0]}
-    )
-
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/reject",
-        headers={"Content-Type": "application/json",
-                 "Authorization": "Bearer " + TOKENS[2]}
+                 "Authorization": "Bearer " + tokens[2]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
 
-def test_reject_event_without_valid_token():
-    response = requests.put(
-        HOST + "/api/v1/events/" + str(EVENT_ID) + "/participant/reject",
+def test_reject_event_without_valid_token(client, create_participant):
+    event_ids = create_participant[2]
+    response = client.put(
+        HOST + "/api/v1/events/" + str(event_ids[0]) + "/participant/reject",
         headers={"Content-Type": "application/json",
                  "Authorization": ""}
     )
