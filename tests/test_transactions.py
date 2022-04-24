@@ -499,7 +499,7 @@ def test_get_one_transaction_for_verified_partner_success(client, create_transac
     tokens = create_transactions_for_partner[0]
     response = client.get(
         HOST + "/api/v1/transactions?ids=" + '1',
-        headers={"Authorization": "Bearer " + tokens[3]}
+        headers={"Authorization": "Bearer " + tokens[2]}
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
@@ -519,14 +519,14 @@ def test_get_one_transaction_for_verified_partner_success(client, create_transac
     assert response['amount'] == 1.01
     assert response['category'] == "Тестовая категория 0"
     assert response['description'] == "description"
-    assert response['event_id'] == 7
+    assert response['event_id'] == 1
     assert response['id'] == 1
     assert response['number'] == 1
     assert response['receipt_id'] is None
-    assert response['transaction_date'] == "Sun, 10 Oct 2021 04:25:03 GMT"
+    assert response['transaction_date'] == "Thu, 17 Feb 2022 04:25:03 GMT"
     assert response['type'] == "Income"
     assert response['updated_at'] is None
-    assert response['user_id'] == 4
+    assert response['user_id'] == 3
 
 
 def test_get_transaction_without_valid_token(client):
@@ -551,8 +551,8 @@ def test_get_transaction_with_invalid_transaction_id(client, get_token):
     }
 
 
-def test_get_one_transaction_for_not_verified_partner(client, create_transaction_for_manager):
-    tokens = create_transaction_for_manager[0]
+def test_get_one_transaction_for_not_verified_partner(client, create_transactions_for_manager):
+    tokens = create_transactions_for_manager[0]
     response = client.get(
         HOST + "/api/v1/transactions?ids=" + '1',
         headers={"Authorization": "Bearer " + tokens[0]}
@@ -570,7 +570,7 @@ def test_get_one_transaction_for_not_verified_partner(client, create_transaction
     assert response['id'] == 1
     assert response['number'] == 1
     assert response['receipt_id'] is None
-    assert response['transaction_date'] == "Sun, 10 Oct 2021 04:25:03 GMT"
+    assert response['transaction_date'] == "Thu, 17 Feb 2022 04:25:03 GMT"
     assert response['type'] == "Income"
     assert response['updated_at'] is None
     assert response['user_id'] == 1
@@ -580,13 +580,13 @@ def test_get_transaction_not_access(client, create_transactions_for_observer):
     tokens = create_transactions_for_observer[0]
     response = client.get(
         HOST + "/api/v1/transactions?ids=" + '1',
-        headers={"Authorization": "Bearer " + tokens[3]}
+        headers={"Authorization": "Bearer " + tokens[2]}
     )
     assert response.status_code == 404
     assert response.headers["Content-Type"] == "application/json"
     assert response.get_json() == {
         "error": "Not found",
-        "message": "Participant for user 4 not found"
+        "message": "Participant for user 3 not found"
     }
 
 
@@ -689,40 +689,6 @@ def test_get_transactions_without_valid_token(client):
 def test_get_transactions_for_verified_observer_success(client, create_transactions_for_observer):
     tokens = create_transactions_for_observer[0]
     response = client.get(
-        HOST + "/api/v1/transactions/all?event_id=1&start=2022-02-15T16:29:10Z&end=2022-02-18T04:25:03Z",
-        headers={"Authorization": "Bearer " + tokens[2]}
-    )
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-    response = response.get_json()
-    assert len(response) == 5
-    response = response[0]
-    assert "id" in response
-    assert "created_at" in response
-    assert "event_id" in response
-    assert "type" in response
-    assert "category" in response
-    assert "amount" in response
-    assert "transaction_date" in response
-    assert "receipt_id" in response
-    assert "description" in response
-    assert len(response) == 12
-    assert response['amount'] == 1.01
-    assert response['category'] == "Тестовая категория 0"
-    assert response['description'] == "description"
-    assert response['event_id'] == 1
-    assert response['id'] == 5
-    assert response['number'] == 5
-    assert response['receipt_id'] is None
-    assert response['transaction_date'] == "Thu, 17 Feb 2022 04:25:03 GMT"
-    assert response['type'] == "Income"
-    assert response['updated_at'] is None
-    assert response['user_id'] == 3
-
-
-def test_get_transactions_for_verified_partner_success(client, create_transactions_for_partner):
-    tokens = create_transactions_for_partner[0]
-    response = client.get(
         HOST + "/api/v1/transactions/all?event_id=7&start=2022-02-15T16:29:10Z&end=2022-02-18T04:25:03Z",
         headers={"Authorization": "Bearer " + tokens[3]}
     )
@@ -752,6 +718,40 @@ def test_get_transactions_for_verified_partner_success(client, create_transactio
     assert response['type'] == "Income"
     assert response['updated_at'] is None
     assert response['user_id'] == 4
+
+
+def test_get_transactions_for_verified_partner_success(client, create_transactions_for_partner):
+    tokens = create_transactions_for_partner[0]
+    response = client.get(
+        HOST + "/api/v1/transactions/all?event_id=1&start=2022-02-15T16:29:10Z&end=2022-02-18T04:25:03Z",
+        headers={"Authorization": "Bearer " + tokens[2]}
+    )
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+    response = response.get_json()
+    assert len(response) == 5
+    response = response[0]
+    assert "id" in response
+    assert "created_at" in response
+    assert "event_id" in response
+    assert "type" in response
+    assert "category" in response
+    assert "amount" in response
+    assert "transaction_date" in response
+    assert "receipt_id" in response
+    assert "description" in response
+    assert len(response) == 12
+    assert response['amount'] == 1.01
+    assert response['category'] == "Тестовая категория 0"
+    assert response['description'] == "description"
+    assert response['event_id'] == 1
+    assert response['id'] == 5
+    assert response['number'] == 5
+    assert response['receipt_id'] is None
+    assert response['transaction_date'] == "Thu, 17 Feb 2022 04:25:03 GMT"
+    assert response['type'] == "Income"
+    assert response['updated_at'] is None
+    assert response['user_id'] == 3
 
 
 def test_get_transactions_for_verified_observer_error(client, create_transactions_for_partner):
@@ -1190,11 +1190,10 @@ def test_delete_transaction_with_invalid_transaction_id(client, create_transacti
         HOST + "/api/v1/transactions/0",
         headers={"Authorization": "Bearer " + TOKEN}
     )
-    assert response.status_code == 403
+    assert response.status_code == 422
     assert response.headers["Content-Type"] == "application/json"
     assert response.get_json() == {
-        "error": "Authentication Error",
-        "message": "User is not authorized"
+        "msg": "Signature verification failed"
     }
 
 

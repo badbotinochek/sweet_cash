@@ -82,7 +82,7 @@ def deleted_date():
     conn.close()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def app():
     app = create_app()
     app.config.update({
@@ -91,11 +91,13 @@ def app():
     # other setup can go here
 
     yield app
-        # DROP SCHEMA public
+    with app.app_context():
+        db.session.remove()
+        db.drop_all()
     # # clean up / reset resources here
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def client(app):
     return app.test_client()
 
