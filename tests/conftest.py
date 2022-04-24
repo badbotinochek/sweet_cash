@@ -1,15 +1,11 @@
 import pytest
-from pathlib import Path
 from db import db
 import psycopg2
 from datetime import datetime
 import time
 import bcrypt
-from api.models.users import UserModel
 
 from app import create_app
-# from api.services.users.register_user import RegisterUser
-# from tests.test_api.test_services.test_users.test_register_user import test_register
 
 HOST = 'http://127.0.0.1:5000'
 NAME = "testName"
@@ -100,25 +96,6 @@ def app():
 @pytest.fixture()
 def client(app):
     return app.test_client()
-
-
-# @pytest.fixture()
-# def added_new_users(client):
-#     """Регистрация в системе 4-х пользователей"""
-#     user_email = (lambda n: f'test{n}@test.com')
-#     password = "1@yAndexru"
-#     for i in range(1, 5):
-#         client.post(
-#             HOST + "/api/v1/auth/register",
-#             json={
-#                 "name": NAME,
-#                 "email": user_email(i),
-#                 "phone": PHONE,
-#                 "password": password
-#             },
-#         )
-#     yield
-#     delete_date()
 
 
 @pytest.fixture()
@@ -396,24 +373,3 @@ def delete_transaction(client, create_transactions_for_manager):
     return tokens
 
 
-# @pytest.fixture()
-# def delete_transaction_status(client, create_transactions_for_manager):
-#     tokens = create_transactions_for_manager[0]
-#     conn = psycopg2.connect(
-#         database="test",
-#         user="postgres",
-#         password="12345",
-#         host="localhost",
-#         port="5432"
-#     )
-#
-#     # Open a cursor to perform database operations
-#     cursor = conn.cursor()
-#
-#     # Execute a query
-#     cursor.execute("UPDATE transactions SET deleted='2021-10-10' WHERE id=1")
-#
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
-#     return tokens
