@@ -2,8 +2,8 @@
 import logging
 from flask_jwt_extended import decode_token
 
-from api.models.users import UserModel
-import api.errors as error
+from sweet_cash.api.models.users import UserModel
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="auth")
 
@@ -18,13 +18,13 @@ class ConfirmUser(object):
             logger.warning(f'User with email {email} is trying to confirm registration')
             raise error.APIValueNotFound(f'User with email {email} not found')
 
-        # try:
-        #     decode_token(encoded_token=confirmation_code)
-        # except Exception as e:
-        #     return open('templates/fail_confirmation.html', 'r').read()
+        try:
+            decode_token(encoded_token=confirmation_code)
+        except Exception as e:
+            return open('sweet_cash/templates/fail_confirmation.html', 'r').read()
 
         user.update(confirmed=True)
 
         logger.info(f'User {user.id} confirmed')
 
-        return open('templates/success_confirmation.html', 'r').read()
+        return open('sweet_cash/templates/success_confirmation.html', 'r').read()

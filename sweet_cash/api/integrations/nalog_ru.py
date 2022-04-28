@@ -1,9 +1,9 @@
 import requests
 import logging
 
-from config import Config
-from api.services.nalog_ru.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
-import api.errors as error
+from sweet_cash.config import Config
+from sweet_cash.api.services.nalog_ru.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="nalog_ru")
 

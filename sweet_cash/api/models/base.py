@@ -1,7 +1,7 @@
 
 from datetime import datetime
 
-from db import db
+from sweet_cash.db import db
 
 
 class BaseModel(db.Model):

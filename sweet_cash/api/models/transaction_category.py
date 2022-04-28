@@ -1,6 +1,6 @@
 
-from db import db
-from api.models.base import BaseModel
+from sweet_cash.db import db
+from sweet_cash.api.models.base import BaseModel
 
 
 class TransactionCategoryModel(BaseModel):

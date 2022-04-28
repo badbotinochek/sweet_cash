@@ -5,14 +5,14 @@ from flask_jwt_extended import jwt_required
 import logging
 from datetime import datetime
 
-from config import Config
-from api.models.session import SessionModel
-from api.models.transaction import TransactionModel
-from api.models.receipt import ReceiptModel
-from api.models.event import EventModel
-from api.models.event_participants import EventParticipantsModel
-from api.models.transaction_category import TransactionCategoryModel
-import api.errors as error
+from sweet_cash.config import Config
+from sweet_cash.api.models.session import SessionModel
+from sweet_cash.api.models.transaction import TransactionModel
+from sweet_cash.api.models.receipt import ReceiptModel
+from sweet_cash.api.models.event import EventModel
+from sweet_cash.api.models.event_participants import EventParticipantsModel
+from sweet_cash.api.models.transaction_category import TransactionCategoryModel
+import sweet_cash.api.errors as error
 
 
 logger = logging.getLogger(name="api")

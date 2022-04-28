@@ -1,9 +1,9 @@
 import logging
 
-from api.api import check_phone_format
-from api.services.users.get_user import GetUser
-from api.integrations.nalog_ru import NalogRuApi
-import api.errors as error
+from sweet_cash.api.api import check_phone_format
+from sweet_cash.api.services.users.get_user import GetUser
+from sweet_cash.api.integrations.nalog_ru import NalogRuApi
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="nalog_ru")
 

@@ -1,8 +1,8 @@
 import logging
 import datetime
 
-from api.models.transaction_category import TransactionCategoryModel
-from cache_management import RedisCache
+from sweet_cash.api.models.transaction_category import TransactionCategoryModel
+from sweet_cash.cache_management import RedisCache
 
 
 logger = logging.getLogger(name="categories")

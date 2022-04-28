@@ -1,5 +1,5 @@
 
-from app import redis
+from sweet_cash.app import redis
 import pickle
 
 

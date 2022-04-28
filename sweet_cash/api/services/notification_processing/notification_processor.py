@@ -1,7 +1,8 @@
 
 import threading
 import time
-from config import Config
+
+from sweet_cash.config import Config
 
 
 class NotificationProcessor(threading.Thread):

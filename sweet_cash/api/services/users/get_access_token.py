@@ -1,7 +1,7 @@
 import logging
 
-from api.models.session import SessionModel
-import api.errors as error
+from sweet_cash.api.models.session import SessionModel
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="auth")
 

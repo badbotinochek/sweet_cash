@@ -1,9 +1,9 @@
 import logging
 
-from api.services.events.get_event_participant import GetEventParticipant
-from api.models.event import EventModel
-from api.api import ids2list
-import api.errors as error
+from sweet_cash.api.services.events.get_event_participant import GetEventParticipant
+from sweet_cash.api.models.event import EventModel
+from sweet_cash.api.api import ids2list
+import sweet_cash.api.errors as error
 
 logger = logging.getLogger(name="events")
 

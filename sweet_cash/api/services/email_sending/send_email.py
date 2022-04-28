@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
-from config import Config
+from sweet_cash.config import Config
 
 logger = logging.getLogger(name="email sending")
 
@@ -34,7 +34,7 @@ class SendEmail(object):
                       <body>
                         <p>Привет!<br>
                            Для завершения регистрации на Sweet Cash перейдите по
-                           <a href="http://127.0.0.1:5000/api/v1/auth/confirm?email={email}&code={confirmation_code}">ссылке</a>.
+                           <a href="{Config.SWEET_CASH_URL}/api/v1/auth/confirm?email={email}&code={confirmation_code}">ссылке</a>.
                         </p>
                       </body>
                     </html>
