@@ -8,7 +8,7 @@ from sweet_cash.config import Config
 from sweet_cash.api.services.notification_processing.notification_processor import NotificationProcessor
 from sweet_cash.message_queue import MessageQueue
 
-logging.basicConfig(filename="../logs.log",
+logging.basicConfig(filename="logs.log",
                     level=logging.INFO,
                     format='%(levelname)s:%(name)s:%(asctime)s: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
