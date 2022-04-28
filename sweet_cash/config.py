@@ -42,3 +42,4 @@ class Config:
 
     EVENT_PROCESSORS = ['Processor-1']
     EVENT_LISTENING_PERIOD_IN_SECONDS = 10
+    
