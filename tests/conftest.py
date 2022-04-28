@@ -1,11 +1,13 @@
 import pytest
-from db import db
 import psycopg2
 from datetime import datetime
 import time
 import bcrypt
+import sys
 
-from app import create_app
+sys.path.append('G:\Python_progect\sweet_cash')
+from sweet_cash.db import db
+from sweet_cash.app import create_app
 
 HOST = 'http://127.0.0.1:5000'
 NAME = "testName"
@@ -78,7 +80,7 @@ def deleted_date():
     conn.close()
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 def app():
     app = create_app()
     app.config.update({
@@ -88,12 +90,12 @@ def app():
 
     yield app
     with app.app_context():
-        db.session.remove()
         db.drop_all()
+        db.create_all()
     # # clean up / reset resources here
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 def client(app):
     return app.test_client()
 
