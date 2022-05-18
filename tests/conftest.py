@@ -3,15 +3,16 @@ import psycopg2
 from datetime import datetime
 import time
 import bcrypt
-import sys
+import sys, os
 
-sys.path.append('Python_progect\sweet_cash')
+sys.path.insert(1, os.getcwd())
 
 from sweet_cash.db import db
 from sweet_cash.app import create_app
-from tests.test_config import Config
+from tests.test_config import TestConfig
 
-HOST = Config.HOST
+HOST = TestConfig.HOST
+PASSWORD = TestConfig.PASSWORD
 
 
 @pytest.fixture(autouse=True)
@@ -24,60 +25,9 @@ def footer_function_scope():
     print('\ntest duration : {:0.3} seconds'.format(delta))
 
 
-def delete_date():
-    """Удаление всех данных во всех таблицах"""
-    conn = psycopg2.connect(
-        database="test",
-        user="postgres",
-        password="12345",
-        host="localhost",
-        port="5432"
-    )
-
-    # Open a cursor to perform database operations
-    cursor = conn.cursor()
-
-    list_table_DB = ('events', 'events_participants', 'nalog_ru_sessions', 'receipts', 'sessions', 'transactions',
-                     'transactions_categories', 'users')
-
-    # Execute a query
-    for i in list_table_DB:
-        cursor.execute(f"TRUNCATE table {i}")
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-
-@pytest.fixture()
-def deleted_date():
-    yield
-    """Удаление всех данных во всех таблицах"""
-    conn = psycopg2.connect(
-        database="test",
-        user="postgres",
-        password="12345",
-        host="localhost",
-        port="5432"
-    )
-
-    # Open a cursor to perform database operations
-    cursor = conn.cursor()
-
-    list_table_DB = ('events', 'events_participants', 'nalog_ru_sessions', 'receipts', 'sessions', 'transactions',
-                     'transactions_categories', 'users')
-
-    # Execute a query
-    for i in list_table_DB:
-        cursor.execute(f"TRUNCATE table {i}")
-
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-
 @pytest.fixture(scope='function')
 def app():
+    """Фикструа, которая вызывается при любом тесте"""
     app = create_app()
     app.config.update({
         "TESTING": True,
@@ -88,7 +38,7 @@ def app():
     with app.app_context():
         db.drop_all()
         db.create_all()
-    # # clean up / reset resources here
+    # После каждого теста, данная фикструра удаляет всю схему и заново её создает
 
 
 @pytest.fixture(scope='function')
@@ -122,14 +72,11 @@ def added_new_users():
     conn.commit()
     cursor.close()
     conn.close()
-    yield
-    delete_date()
 
 
 @pytest.fixture()
 def get_token(client, added_new_users):
     user_email = (lambda n: f'test{n}@test.com')
-    password = "1@yAndexru"
     user_ids = []
     tokens = []
 
@@ -138,7 +85,7 @@ def get_token(client, added_new_users):
             HOST + "/api/v1/auth/login",
             json={
                 "email": user_email(i),
-                "password": password
+                "password": PASSWORD
             },
             headers={"Content-Type": "application/json"}
         )

@@ -1,5 +1,8 @@
-TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY1MDIyNjgzNCwianRpIjoiOTk0NTk5ZTMtMTk4Mi00NTk2LWEyNmEtNDkyOTlhNTg0YWRhIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjUwMjI2ODM0LCJleHAiOjE2NTIzMDA0MzR9.uP_oLwA0lOYws0'
-HOST = 'http://127.0.0.1:5000'
+
+from tests.test_config import TestConfig
+
+HOST = TestConfig.HOST
+TOKEN = TestConfig.TOKEN
 
 
 '''

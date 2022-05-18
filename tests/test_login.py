@@ -1,8 +1,10 @@
-HOST = 'http://127.0.0.1:5000'
-NAME = "testName"
-EMAIL = "test1@test.com"
-PHONE = '+79001234567'
-PASSWORD = "1@yAndexru"
+from tests.test_config import TestConfig
+
+HOST = TestConfig.HOST
+NAME = TestConfig.NAME
+EMAIL = TestConfig.EMAIL
+PHONE = TestConfig.PHONE
+PASSWORD = TestConfig.PASSWORD
 REFRESH_TOKEN = ''
 TOKEN = ''
 
@@ -11,7 +13,7 @@ TEST REGISTER
 '''
 
 
-def test_register_success(client, deleted_date):
+def test_register_success(client):
     """Ожидаемый результат - Успех. Регистрация пользователя"""
     response = client.post(
         HOST + "/api/v1/auth/register",

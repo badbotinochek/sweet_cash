@@ -1,4 +1,6 @@
-HOST = 'http://127.0.0.1:5000'
+from tests.test_config import TestConfig
+
+HOST = TestConfig.HOST
 
 
 '''
