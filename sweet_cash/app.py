@@ -41,6 +41,7 @@ def create_app():
     from sweet_cash.api.routes.external_auth import external_auth_api
     from sweet_cash.api.routes.receipts import receipts_api
     from sweet_cash.api.routes.events import events_api
+    from sweet_cash.api.routes.views import views_api
 
     app.register_blueprint(auth_api)
     app.register_blueprint(transactions_api)
@@ -48,6 +49,7 @@ def create_app():
     app.register_blueprint(receipts_api)
     app.register_blueprint(events_api)
     app.register_blueprint(error.blueprint)
+    app.register_blueprint(views_api)
 
     # jwt
     app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
