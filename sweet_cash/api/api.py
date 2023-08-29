@@ -228,7 +228,7 @@ def formatting(data) -> dict:
                 "id": data.id,
                 "created_at": data.created_at,
                 "external_id": data.external_id,
-                "transaction_id": data.transaction_id
+                # "transaction_id": data.transaction_id
             }
         elif isinstance(data, EventModel):
             formatted_data = {
